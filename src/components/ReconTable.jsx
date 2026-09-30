@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from './Badge';
 import { fmtNum, esc } from '../utils/format';
+import { MoreVertical } from 'lucide-react';
 
 const STATUS_META = {
   'Matched': { cls: 'green', dot: 'green' },
@@ -43,6 +44,7 @@ export default function ReconTable({ rows }) {
             <th className="num">Books Tax</th>
             <th className="num">2B Tax</th>
             <th className="num">Diff (Tax)</th>
+            <th style={{ textAlign: "center", width: "40px" }}>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -54,8 +56,8 @@ export default function ReconTable({ rows }) {
             return (
               <tr key={r.id || i}>
                 <td>
-                  <Badge color={attention ? 'orange' : 'green'} dot title={title}>
-                    {attention ? 'Review' : 'OK'}
+                  <Badge color={attention ? (Math.abs(r.diffTax) > 100 ? 'red' : 'purple') : 'green'} dot title={title}>
+                    {attention ? (Math.abs(r.diffTax) > 100 ? 'High' : 'Review') : 'OK'}
                   </Badge>
                 </td>
                 <td>

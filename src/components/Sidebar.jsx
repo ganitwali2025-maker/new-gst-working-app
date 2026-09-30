@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Scale, Book, FileText, Landmark,
   ArrowRightLeft, FileBarChart, Upload, Building2, Settings, Banknote,
   ChevronDown, ChevronRight
-} from 'lucide-react';
+, BarChart3 } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
 const NAV = [
   { id: 'dashboard', path: '/dashboard', label: 'ITC Dashboard', icon: LayoutDashboard },
@@ -33,6 +34,7 @@ const NAV = [
 ];
 
 export default function Sidebar() {
+  const { activeCompany, financialYear, month } = useAppContext();
   const [openGroups, setOpenGroups] = useState({ 
     'books-reco': true, 
     'gstr2b-group': true, 
@@ -47,10 +49,18 @@ export default function Sidebar() {
 
   return (
     <aside id="sidebar">
-      <div className="brand">
+      <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{
+          width: '34px', height: '34px', borderRadius: '10px',
+          background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 10px rgba(124,58,237,0.3)', flex: 'none'
+        }}>
+          <BarChart3 size={18} color="#fff" />
+        </div>
         <div>
-          <div className="brand-name">GST RecoManager</div>
-          <div className="brand-sub">Smart Reconciliation. Accurate ITC. Complete GST Control.</div>
+          <div className="brand-name" style={{ fontSize: '15px' }}>GST RecoManager</div>
+          <div className="brand-sub" style={{ fontSize: '10px', lineHeight: '1.2' }}>Smart Reconciliation. Accurate ITC.<br/>Complete GST Control.</div>
         </div>
       </div>
 
@@ -106,9 +116,29 @@ export default function Sidebar() {
       </nav>
 
       <div id="sidebar-foot" style={{ marginTop: 'auto', paddingTop: '12px' }}>
-        <div className="foot-row">
-          <span>Data stored</span>
-          <span>on this device</span>
+        <div className="company-info-card" style={{
+          display: 'flex', alignItems: 'center', gap: '10px',
+          background: 'rgba(255,255,255,0.08)', padding: '10px 12px',
+          borderRadius: '10px', cursor: 'pointer', transition: '0.2s', border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '8px',
+            background: 'var(--accent)', color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: '600', fontSize: '14px', flex: 'none',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+          }}>
+            {activeCompany?.name ? activeCompany.name.charAt(0).toUpperCase() : 'A'}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '13px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {activeCompany?.name || 'Company Name'}
+            </div>
+            <div style={{ fontSize: '11.5px', color: '#c4b5fd', marginTop: '1px' }}>
+              FY {financialYear || '2026-27'} | {month || 'Sep'}
+            </div>
+          </div>
+          <ChevronRight size={16} color="#a78bfa" />
         </div>
       </div>
     </aside>
