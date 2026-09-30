@@ -44,7 +44,7 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
   :root[data-theme="light"] {
-  --bg: #F8F9FC;
+  --bg: #EAEFF5;
   --sidebar-bg: linear-gradient(180deg, #4c1d95 0%, #311171 100%);
   --sidebar: transparent;
   --panel: #ffffff;
