@@ -348,7 +348,7 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               return (
                 <tr key={r.id || i}>
                   <td>{esc(r.month)}</td>
-                  <td>{esc(r.quarter) || 'Q'}</td>
+                  <td>{esc(r.quarter) === 'Q1' ? 'Q1 (Apr-Jun)' : esc(r.quarter) === 'Q2' ? 'Q2 (Jul-Sep)' : esc(r.quarter) === 'Q3' ? 'Q3 (Oct-Dec)' : esc(r.quarter) === 'Q4' ? 'Q4 (Jan-Mar)' : esc(r.quarter) || 'Q'}</td>
                   <td>{esc(r.fy)}</td>
                   <td>{esc(r.invoiceDate)}</td>
                   <td>{esc(r.supplierName)}</td>
