@@ -86,18 +86,6 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
         <div className="val" style={{ color: hex, fontWeight: 700, fontSize: '22px', letterSpacing: '-0.02em', marginBottom: '4px' }}>{val}</div>
         <div className="delta" style={{ color: 'var(--muted)', fontWeight: 500, fontSize: '12px' }}>{sub}</div>
       </div>
-
-      {/* Bottom accent line */}
-      <div style={{
-        position: 'absolute',
-        bottom: '16px',
-        left: '16px',
-        height: '4px',
-        width: '40px',
-        background: hex,
-        borderRadius: '4px',
-        zIndex: 1
-      }} />
     </div>
   );
 }
