@@ -36,6 +36,15 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
     return c;
   }
 
+  const getGlow = (c) => {
+    if(c.includes('accent') || c.includes('purple')) return '0 8px 24px rgba(124, 58, 237, 0.2)';
+    if(c.includes('blue')) return '0 8px 24px rgba(59, 130, 246, 0.2)';
+    if(c.includes('green')) return '0 8px 24px rgba(16, 185, 129, 0.2)';
+    if(c.includes('yellow')) return '0 8px 24px rgba(245, 158, 11, 0.2)';
+    if(c.includes('red')) return '0 8px 24px rgba(239, 68, 68, 0.2)';
+    return '0 8px 24px rgba(0,0,0,0.08)';
+  }
+
   const badgeSize = small ? '34px' : '44px';
   const iconSize = small ? 16 : 22;
 
@@ -45,21 +54,16 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
       onClick={onClick}
       style={{
         cursor: onClick ? 'pointer' : 'default',
-        background: active ? getGradient(color) : 'var(--panel)',
-        border: active ? `2px solid ${color}` : '1px solid var(--border-soft)',
+        background: 'var(--panel)',
+        border: 'none',
         borderTop: `4px solid ${color.includes('var(') ? color : 'var(--accent)'}`,
         transform: active ? 'scale(1.02)' : undefined,
-        boxShadow: active ? '0 8px 16px rgba(0,0,0,0.08)' : '0 2px 4px rgba(0,0,0,0.04)',
+        boxShadow: getGlow(color),
         transition: 'all 0.2s ease',
         position: 'relative',
         overflow: 'hidden'
       }}
     >
-      <div style={{
-        position: 'absolute', top: 0, right: 0, bottom: 0, width: '100px',
-        background: getGradient(color), opacity: 0.5, borderRadius: '100% 0 0 100%',
-        transform: 'translateX(30%)'
-      }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -67,7 +71,7 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
           background: getIconGradient(color),
           color: '#ffffff',
           marginBottom: small ? '10px' : '14px',
-          boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+          boxShadow: getGlow(color)
         }}>
           <Icon size={iconSize} strokeWidth={2.5} />
         </div>
