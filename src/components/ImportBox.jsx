@@ -46,9 +46,9 @@ export default function ImportBox({ target = 'books' }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [replace, setReplace] = useState(true);
   
-  
-  
-  
+  const [importMonth, setImportMonth] = useState(month || '');
+  const [importQuarter, setImportQuarter] = useState('');
+  const [importFy, setImportFy] = useState(financialYear || '');
 
   const getTargetFields = (kind) => (kind === 'gstr2b' || kind === 'gstr2b_gov') ? [...TARGET_FIELDS_BASE, ...TARGET_FIELDS_G2B_EXTRA] : TARGET_FIELDS_BASE;
 
@@ -108,9 +108,9 @@ export default function ImportBox({ target = 'books' }) {
       invoiceNo: g(mapping.invoiceNo), invoiceDate: rawDate, gstin: g(mapping.gstin), supplierName: g(mapping.supplierName),
       taxable: parseNum(g(mapping.taxable)), igst: parseNum(g(mapping.igst)), cgst: parseNum(g(mapping.cgst)), sgst: parseNum(g(mapping.sgst)), cess: parseNum(g(mapping.cess)),
       supplierType: mapping.supplierType ? g(mapping.supplierType) : '', gstr1Filed: mapping.gstr1Filed ? g(mapping.gstr1Filed) : '',
-      month: month || dateInfo.month, 
-      quarter: (['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4') || dateInfo.quarter, 
-      fy: financialYear || dateInfo.fy
+      month: importMonth || dateInfo.month, 
+      quarter: importQuarter || dateInfo.quarter, 
+      fy: importFy || dateInfo.fy
     };
   };
   
@@ -245,7 +245,7 @@ export default function ImportBox({ target = 'books' }) {
       return;
     }
     
-    if (!financialYear || !(['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4') || !month) {
+    if (!importFy || !importQuarter || !importMonth) {
       setErrorMsg('Please select Financial Year, Quarter, and Month above.');
       return;
     }
@@ -272,9 +272,9 @@ export default function ImportBox({ target = 'books' }) {
         id: uid(), 
         companyId: activeCompanyId, 
         ...mapped,
-        fy: financialYear, 
-        month: month, 
-        quarter: (['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4')
+        fy: importFy, 
+        month: importMonth, 
+        quarter: importQuarter
       };
     }).filter(r => r.invoiceNo);
 
@@ -287,7 +287,7 @@ export default function ImportBox({ target = 'books' }) {
       syncGstr1ToSheets(updatedData);
     }
     
-    updateState({ [storeKey]: updatedData });
+    updateState({ [storeKey]: updatedData, month: importMonth, financialYear: importFy });
     setImporting(false);
     
     // Reset state and close
@@ -395,7 +395,10 @@ export default function ImportBox({ target = 'books' }) {
               {/* Select Options */}
               <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                 <select 
-                  value={financialYear} onChange={e => setfinancialYear(e.target.value)}
+                  value={importFy} onChange={e => {
+                    setImportFy(e.target.value);
+                    updateState({ financialYear: e.target.value });
+                  }}
                   style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
                 >
                   <option value="">Select FY</option>
@@ -403,7 +406,7 @@ export default function ImportBox({ target = 'books' }) {
                 </select>
 
                 <select 
-                  value={(['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4')} onChange={e => set(['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4')(e.target.value)}
+                  value={importQuarter} onChange={e => setImportQuarter(e.target.value)}
                   style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
                 >
                   <option value="">Select Quarter</option>
@@ -414,7 +417,10 @@ export default function ImportBox({ target = 'books' }) {
                 </select>
 
                 <select 
-                  value={month} onChange={e => setmonth(e.target.value)}
+                  value={importMonth} onChange={e => {
+                    setImportMonth(e.target.value);
+                    updateState({ month: e.target.value });
+                  }}
                   style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
                 >
                   <option value="">Select Month</option>
@@ -546,10 +552,10 @@ export default function ImportBox({ target = 'books' }) {
                     alignItems: 'center',
                     gap: '8px',
                     cursor: 'pointer',
-                    opacity: pastedData.rawRows.length > 0 && financialYear && (['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4') && month ? 1 : 0.6
+                    opacity: pastedData.rawRows.length > 0 && importFy && importQuarter && importMonth ? 1 : 0.6
                   }}
                   onClick={handleImportClick}
-                  disabled={importing || pastedData.rawRows.length === 0 || !financialYear || !(['Apr','May','Jun'].includes(month) ? 'Q1' : ['Jul','Aug','Sep'].includes(month) ? 'Q2' : ['Oct','Nov','Dec'].includes(month) ? 'Q3' : 'Q4') || !month}
+                  disabled={importing || pastedData.rawRows.length === 0 || !importFy || !importQuarter || !importMonth}
                 >
                   <Database size={16} />
                   {importing ? 'Importing...' : 'Import Data'}
