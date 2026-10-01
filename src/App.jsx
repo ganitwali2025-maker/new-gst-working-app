@@ -63,7 +63,7 @@ function MainLayout() {
             
             <Route path="/rcmdata" element={<RcmData />} />
             <Route path="/books-itc" element={<GenericTablePage title="Books ITC" type="books" hint="ITC from books" />} />
-            <Route path="/gstr1" element={<GenericTablePage title="GSTR-1 Sales Register" type="gstr1" hint="Detailed invoice-wise outward supply statement for GST return preparation." />} />
+            <Route path="/gstr1" element={<GenericTablePage title="GSTR-1 Sales Register" type="gstr1" hint="Complete sales register and outward supplies for accurate GST return filing." />} />
             
             <Route path="/reports" element={<Reports />} />
             <Route path="/reco-report" element={<GenericTablePage title="Reconciliation Report" type="books" hint="Detailed reco report" />} />
