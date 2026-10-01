@@ -63,6 +63,7 @@ export default function Topbar({ toggleSidebar }) {
       <div className="topbar-controls">
         <button className="btn ghost" onClick={toggleTheme} title={getThemeTitle()}>
           {getThemeIcon()}
+        </button>
         
         <select 
           className="ctrl" 
@@ -102,7 +103,7 @@ export default function Topbar({ toggleSidebar }) {
           </div>
           <button className="btn ghost danger" onClick={logout} title="Logout" style={{ padding: '6px' }}>
             <LogOut size={16} />
-          
+          </button>
         </div>
 
       </div>
