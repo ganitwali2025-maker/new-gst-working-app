@@ -421,6 +421,32 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
             );
           })}
         </tbody>
+        <tfoot>
+          <tr style={{ background: 'var(--panel-2)', fontWeight: 'bold' }}>
+            {type === 'gstr1' ? (
+              <>
+                <td colSpan={7} style={{ textAlign: 'right', paddingRight: '16px', color: 'var(--purple)' }}>TOTAL</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalTaxable)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalIgst)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalCgst)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalSgst)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalTax)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalInvoice)}</td>
+              </>
+            ) : (
+              <>
+                <td colSpan={6} style={{ textAlign: 'right', paddingRight: '16px', color: 'var(--purple)' }}>TOTAL</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalTaxable)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalIgst)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalCgst)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalSgst)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalCess)}</td>
+                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalInvoice)}</td>
+              </>
+            )}
+            {dataType && <td></td>}
+          </tr>
+        </tfoot>
       </table>
       
       {auditRow && dataType && (
