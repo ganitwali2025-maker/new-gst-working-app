@@ -44,8 +44,8 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
           return {
             id: r["ID"] || String(Math.random()),
             companyId: activeCompanyId,
-            fy: financialYear,
-            month: month,
+            fy: r["Financial Year"] || financialYear,
+            month: r["Month"] || month,
             quarter: r["Quarter"] || "",
             invoiceDate: dStr,
             supplierName: r["Supplier / Party Name"] || "",
