@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity, IndianRupee, Globe2, Landmark, MapPin, Receipt, Calculator, Banknote } from 'lucide-react';
+import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity, IndianRupee, Globe2, Landmark, MapPin, Receipt, Calculator, Banknote, BarChart2 } from 'lucide-react';
 
 export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon: CustomIcon, small, onClick, active }) {
   let Icon = CustomIcon;
@@ -21,34 +21,13 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
     else Icon = Activity;
   }
 
-  const getGradient = (c) => {
-    if(c.includes('accent')) return 'linear-gradient(135deg, #f5f3ff, #ede9fe)';
-    if(c.includes('blue')) return 'linear-gradient(135deg, #eff6ff, #dbeafe)';
-    if(c.includes('green')) return 'linear-gradient(135deg, #ecfdf5, #d1fae5)';
-    if(c.includes('yellow')) return 'linear-gradient(135deg, #fffbeb, #fef3c7)';
-    if(c.includes('purple')) return 'linear-gradient(135deg, #faf5ff, #f3e8ff)';
-    if(c.includes('red')) return 'linear-gradient(135deg, #fef2f2, #fee2e2)';
-    return 'var(--panel)';
-  }
-
-  const getIconGradient = (c) => {
-    if(c.includes('accent')) return 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
-    if(c.includes('blue')) return 'linear-gradient(135deg, #3b82f6, #2563eb)';
-    if(c.includes('green')) return 'linear-gradient(135deg, #10b981, #059669)';
-    if(c.includes('yellow')) return 'linear-gradient(135deg, #f59e0b, #d97706)';
-    if(c.includes('purple')) return 'linear-gradient(135deg, #a855f7, #9333ea)';
-    if(c.includes('red')) return 'linear-gradient(135deg, #ef4444, #dc2626)';
-    return c;
-  }
-
-  const getGlow = (c) => {
-    if(c.includes('accent') || c.includes('purple')) return '0 8px 24px rgba(124, 58, 237, 0.2)';
-    if(c.includes('blue')) return '0 8px 24px rgba(59, 130, 246, 0.2)';
-    if(c.includes('green')) return '0 8px 24px rgba(16, 185, 129, 0.2)';
-    if(c.includes('yellow')) return '0 8px 24px rgba(245, 158, 11, 0.2)';
-    if(c.includes('red')) return '0 8px 24px rgba(239, 68, 68, 0.2)';
-    return '0 8px 24px rgba(0,0,0,0.08)';
-  }
+  const l = (label || '').toLowerCase();
+  let hex = '#7C3AED'; // Default purple
+  if (l.includes('taxable')) hex = '#7C3AED';
+  else if (l.includes('igst')) hex = '#2563EB';
+  else if (l.includes('cgst')) hex = '#059669';
+  else if (l.includes('sgst')) hex = '#F59E0B';
+  else if (l === 'total gst' || l === 'gst') hex = '#9333EA';
 
   const badgeSize = small ? '34px' : '44px';
   const iconSize = small ? 16 : 22;
@@ -59,31 +38,66 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
       onClick={onClick}
       style={{
         cursor: onClick ? 'pointer' : 'default',
-        background: 'var(--panel)',
-        border: 'none',
+        background: '#ffffff',
+        border: `1px solid ${hex}40`,
+        borderRadius: '12px',
         transform: active ? 'scale(1.02)' : undefined,
-        boxShadow: getGlow(color),
+        boxShadow: active ? `0 8px 24px ${hex}30` : `0 2px 8px ${hex}15`,
         transition: 'all 0.2s ease',
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: '12px'
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '16px'
       }}
     >
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      {/* Background soft wavy shape */}
+      <svg 
+        style={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.1, zIndex: 0, width: '120px', height: '100px', pointerEvents: 'none' }}
+        viewBox="0 0 100 100" preserveAspectRatio="none"
+      >
+        <path d="M0,100 C30,70 60,90 100,50 L100,100 Z" fill={hex} />
+        <path d="M0,100 C40,80 70,100 100,40 L100,100 Z" fill={hex} opacity="0.5" />
+      </svg>
+
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: badgeSize, height: badgeSize, borderRadius: '12px',
-          background: getIconGradient(color),
+          width: badgeSize, height: badgeSize, borderRadius: '50%',
+          background: hex,
           color: '#ffffff',
-          marginBottom: small ? '10px' : '14px',
-          boxShadow: getGlow(color)
+          boxShadow: `0 4px 10px ${hex}40`
         }}>
           <Icon size={iconSize} strokeWidth={2.5} />
         </div>
-        <div className="lbl" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{label}</div>
-        <div className="val" style={{ color: color.includes('var(') ? color : 'var(--accent)', textShadow: '0 1px 1px rgba(0,0,0,0.05)' }}>{val}</div>
-        <div className="delta" style={{ color: 'var(--muted)', fontWeight: 500 }}>{sub}</div>
+        
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: '28px', height: '28px', borderRadius: '8px',
+          background: `${hex}15`,
+          color: hex
+        }}>
+          <BarChart2 size={16} />
+        </div>
       </div>
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div className="lbl" style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '13px', marginBottom: '4px' }}>{label}</div>
+        <div className="val" style={{ color: hex, fontWeight: 700, fontSize: '22px', letterSpacing: '-0.02em', marginBottom: '4px' }}>{val}</div>
+        <div className="delta" style={{ color: 'var(--muted)', fontWeight: 500, fontSize: '12px' }}>{sub}</div>
+      </div>
+
+      {/* Bottom accent line */}
+      <div style={{
+        position: 'absolute',
+        bottom: '16px',
+        left: '16px',
+        height: '4px',
+        width: '40px',
+        background: hex,
+        borderRadius: '4px',
+        zIndex: 1
+      }} />
     </div>
   );
 }
