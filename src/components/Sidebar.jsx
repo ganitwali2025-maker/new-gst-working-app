@@ -114,7 +114,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
                       <NavLink 
                         key={child.id} 
                         to={child.path} 
-                        className={({ isActive }) => avlink ${isActive ? 'active' : ''}`}
+                        className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
                         style={{ fontSize: '13px', padding: '7px 10px', height: '32px' }}
                       >
                         <span>{child.label}</span>
@@ -129,7 +129,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             <NavLink 
               key={n.id} 
               to={n.path} 
-              className={({ isActive }) => avlink ${isActive ? 'active' : ''}`}
+              className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
             >
               <n.icon size={16} />
               <span>{n.label}</span>
