@@ -53,25 +53,24 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         onClick={toggleSidebar} 
         style={{ 
           position: 'absolute', 
-          top: '30px', 
-          right: '-16px', 
-          width: '16px', 
-          height: '32px', 
-          background: 'var(--panel)', 
+          top: '27px', 
+          right: '-12px', 
+          width: '24px', 
+          height: '24px', 
+          background: '#ffffff', 
           border: '1px solid var(--border-soft)',
-          borderLeft: 'none',
-          borderRadius: '0 8px 8px 0', 
+          borderRadius: '50%', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           cursor: 'pointer', 
           zIndex: 100, 
           color: 'var(--purple)', 
-          boxShadow: '2px 0 4px rgba(0,0,0,0.02)' 
+          boxShadow: '0 2px 6px rgba(0,0,0,0.1)' 
         }} 
-        title="Toggle sidebar"
+        title={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
       >
-        {isOpen ? <ChevronLeft size={14} style={{ marginLeft: '-2px' }} /> : <ChevronRight size={14} style={{ marginLeft: '-2px' }} />}
+        {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>
       <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
