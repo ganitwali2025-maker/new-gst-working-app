@@ -44,7 +44,7 @@ export default function ImportBox({ target = 'books' }) {
   const [pastedData, setPastedData] = useState({ headers: [], rawRows: [] });
   const [pasteText, setPasteText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [replace, setReplace] = useState(true);
+  const [replace, setReplace] = useState(false);
   
   const [importMonth, setImportMonth] = useState(month || '');
   const [importQuarter, setImportQuarter] = useState('');
