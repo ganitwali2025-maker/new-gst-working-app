@@ -42,7 +42,7 @@ function MainLayout() {
 
   return (
     <div id="shell" className={sidebarOpen ? '' : 'sidebar-closed'}>
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <div id="main-col">
         <Topbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main id="content">

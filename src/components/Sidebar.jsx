@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Scale, Book, FileText, Landmark,
   ArrowRightLeft, FileBarChart, Upload, Building2, Settings, Banknote,
   ChevronDown, ChevronRight
-, BarChart3 } from 'lucide-react';
+, BarChart3, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 const NAV = [
@@ -33,7 +33,7 @@ const NAV = [
   { id: 'settings', path: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, toggleSidebar }) {
   const { activeCompany, financialYear, month } = useAppContext();
   const [openGroups, setOpenGroups] = useState({ 
     'books-reco': true, 
@@ -49,6 +49,29 @@ export default function Sidebar() {
 
   return (
     <aside id="sidebar">
+      <button 
+        onClick={toggleSidebar} 
+        style={{ 
+          position: 'absolute', 
+          top: '24px', 
+          right: '-14px', 
+          width: '28px', 
+          height: '28px', 
+          background: 'var(--panel)', 
+          border: '1px solid var(--border-soft)', 
+          borderRadius: '8px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          cursor: 'pointer', 
+          zIndex: 100, 
+          color: 'var(--purple)', 
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)' 
+        }} 
+        title="Toggle sidebar"
+      >
+        {isOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+      </button>
       <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
           width: '34px', height: '34px', borderRadius: '10px',
@@ -91,7 +114,7 @@ export default function Sidebar() {
                       <NavLink 
                         key={child.id} 
                         to={child.path} 
-                        className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
+                        className={({ isActive }) => avlink ${isActive ? 'active' : ''}`}
                         style={{ fontSize: '13px', padding: '7px 10px', height: '32px' }}
                       >
                         <span>{child.label}</span>
@@ -106,7 +129,7 @@ export default function Sidebar() {
             <NavLink 
               key={n.id} 
               to={n.path} 
-              className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
+              className={({ isActive }) => avlink ${isActive ? 'active' : ''}`}
             >
               <n.icon size={16} />
               <span>{n.label}</span>

@@ -52,9 +52,9 @@ export default function Topbar({ toggleSidebar }) {
   return (
     <header id="topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button className="btn ghost" onClick={toggleSidebar} style={{ padding: '6px', cursor: 'pointer' }} title="Toggle sidebar">
-          <Menu size={18} />
-        </button>
+        
+          
+        
         <div>
           <div className="page-title">{meta.title}</div>
           <div className="page-sub">{meta.sub}</div>
@@ -63,7 +63,7 @@ export default function Topbar({ toggleSidebar }) {
       <div className="topbar-controls">
         <button className="btn ghost" onClick={toggleTheme} title={getThemeTitle()}>
           {getThemeIcon()}
-        </button>
+        
         <select 
           className="ctrl" 
           value={activeCompanyId}
@@ -102,7 +102,7 @@ export default function Topbar({ toggleSidebar }) {
           </div>
           <button className="btn ghost danger" onClick={logout} title="Logout" style={{ padding: '6px' }}>
             <LogOut size={16} />
-          </button>
+          
         </div>
 
       </div>

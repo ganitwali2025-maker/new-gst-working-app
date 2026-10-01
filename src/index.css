@@ -133,7 +133,7 @@
     padding-left: 0;
     padding-right: 0;
   }
-  #sidebar { transition: width 0.2s ease, flex 0.2s ease, padding 0.2s ease; overflow-x: hidden; }
+  #sidebar { transition: width 0.2s ease, flex 0.2s ease, padding 0.2s ease;  }
 
   /* ---------- Sidebar ---------- */
   #sidebar{
