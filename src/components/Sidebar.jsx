@@ -57,30 +57,22 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           right: '14px', 
           width: '24px', 
           height: '24px', 
-          background: '#ffffff', 
-          border: '1px solid var(--border-soft)',
+          background: 'transparent', 
+          border: '1px solid rgba(255, 255, 255, 0.5)',
           borderRadius: '50%', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           cursor: 'pointer', 
           zIndex: 100, 
-          color: 'var(--purple)', 
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)' 
+          color: '#ffffff', 
+          boxShadow: 'none' 
         }} 
         title={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
       >
         {isOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>
       <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{
-          width: '34px', height: '34px', borderRadius: '10px',
-          background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 10px rgba(124,58,237,0.3)', flex: 'none'
-        }}>
-          <BarChart3 size={18} color="#fff" />
-        </div>
         <div>
           <div className="brand-name" style={{ fontSize: '15px' }}>GST RecoManager</div>
           
