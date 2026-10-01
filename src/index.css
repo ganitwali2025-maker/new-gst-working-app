@@ -307,7 +307,7 @@
   table{width:100%;border-collapse:collapse;font-size:12.8px;min-width:640px;}
   thead th {
   text-align: left; 
-  background: linear-gradient(90deg, #a78bfa, var(--purple)); 
+  background: linear-gradient(90deg, var(--purple) 70%, #b592fc); 
   color: #ffffff;
   font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px;
   text-transform: uppercase; letter-spacing: 0.05em;
