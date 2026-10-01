@@ -83,9 +83,9 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
         <div className="panel-head" style={{ flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h3 style={{ 
-              background: 'linear-gradient(90deg, var(--purple), #3B82F6)', 
-              WebkitBackgroundClip: 'text', 
-              WebkitTextFillColor: 'transparent',
+              color: 'var(--purple)', 
+               
+              
               display: 'flex', 
               alignItems: 'center', 
               fontWeight: 800,
