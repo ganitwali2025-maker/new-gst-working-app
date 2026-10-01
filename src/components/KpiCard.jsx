@@ -1,11 +1,16 @@
 import React from 'react';
-import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity } from 'lucide-react';
+import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity, IndianRupee, Globe2, Landmark, MapPin, Receipt, Calculator, Banknote } from 'lucide-react';
 
 export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon: CustomIcon, small, onClick, active }) {
   let Icon = CustomIcon;
   if (!Icon) {
     const l = (label || '').toLowerCase();
-    if (l.includes('purchase')) Icon = ShoppingCart;
+    if (l.includes('taxable')) Icon = Calculator;
+    else if (l.includes('igst')) Icon = Globe2;
+    else if (l.includes('cgst')) Icon = Landmark;
+    else if (l.includes('sgst')) Icon = MapPin;
+    else if (l === 'total gst' || l === 'gst') Icon = IndianRupee;
+    else if (l.includes('purchase')) Icon = ShoppingCart;
     else if (l.includes('matched')) Icon = CheckCircle;
     else if (l.includes('mismatch')) Icon = AlertCircle;
     else if (l.includes('missing in 2b') || l.includes('not in 2b')) Icon = FileMinus;
