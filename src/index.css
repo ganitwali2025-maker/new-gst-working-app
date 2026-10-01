@@ -303,7 +303,7 @@
   .dot.purple{background:var(--purple);}
 
   /* ---------- Table ---------- */
-  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-soft); box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;}
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-soft); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
   table{width:100%;border-collapse:collapse;font-size:12.8px;min-width:640px;}
   thead th {
   text-align: left; 
