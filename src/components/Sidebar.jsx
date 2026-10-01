@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, Scale, Book, FileText, Landmark,
   ArrowRightLeft, FileBarChart, Upload, Building2, Settings, Banknote,
-  ChevronDown, ChevronRight
+  ChevronDown, ChevronRight, ChevronLeft
 , BarChart3, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
@@ -53,24 +53,25 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         onClick={toggleSidebar} 
         style={{ 
           position: 'absolute', 
-          top: '24px', 
-          right: '-14px', 
-          width: '28px', 
-          height: '28px', 
+          top: '30px', 
+          right: '-16px', 
+          width: '16px', 
+          height: '32px', 
           background: 'var(--panel)', 
-          border: '1px solid var(--border-soft)', 
-          borderRadius: '8px', 
+          border: '1px solid var(--border-soft)',
+          borderLeft: 'none',
+          borderRadius: '0 8px 8px 0', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           cursor: 'pointer', 
           zIndex: 100, 
           color: 'var(--purple)', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.05)' 
+          boxShadow: '2px 0 4px rgba(0,0,0,0.02)' 
         }} 
         title="Toggle sidebar"
       >
-        {isOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+        {isOpen ? <ChevronLeft size={14} style={{ marginLeft: '-2px' }} /> : <ChevronRight size={14} style={{ marginLeft: '-2px' }} />}
       </button>
       <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
