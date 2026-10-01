@@ -52,11 +52,12 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
             gstin: r["GST No"] || "",
             invoiceNo: r["Invoice No"] || "",
             taxable: Number(r["Taxable Value"]) || 0,
-          igst: Number(r["IGST"]) || 0,
-          cgst: Number(r["CGST"]) || 0,
-          sgst: Number(r["SGST"]) || 0,
-          cess: 0
-        }));
+            igst: Number(r["IGST"]) || 0,
+            cgst: Number(r["CGST"]) || 0,
+            sgst: Number(r["SGST"]) || 0,
+            cess: 0
+          };
+        });
         
         const otherData = gstr1.filter(r => r.companyId !== activeCompanyId);
         updateState({ gstr1: [...otherData, ...mappedData] });
