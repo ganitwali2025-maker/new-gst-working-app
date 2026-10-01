@@ -33,17 +33,25 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
       const sheetData = await res.json();
       
       if (Array.isArray(sheetData)) {
-        const mappedData = sheetData.map(r => ({
-          id: r["ID"] || String(Math.random()),
-          companyId: activeCompanyId,
-          fy: financialYear,
-          month: month,
-          quarter: r["Quarter"] || "",
-          invoiceDate: r["Invoice Date"] || "",
-          supplierName: r["Supplier / Party Name"] || "",
-          gstin: r["GST No"] || "",
-          invoiceNo: r["Invoice No"] || "",
-          taxable: Number(r["Taxable Value"]) || 0,
+        const mappedData = sheetData.map(r => {
+          let dStr = r["Invoice Date"] || "";
+          if (dStr && dStr.includes("T") && dStr.endsWith("Z")) {
+            const d = new Date(dStr);
+            if (!isNaN(d.getTime())) {
+              dStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+          }
+          return {
+            id: r["ID"] || String(Math.random()),
+            companyId: activeCompanyId,
+            fy: financialYear,
+            month: month,
+            quarter: r["Quarter"] || "",
+            invoiceDate: dStr,
+            supplierName: r["Supplier / Party Name"] || "",
+            gstin: r["GST No"] || "",
+            invoiceNo: r["Invoice No"] || "",
+            taxable: Number(r["Taxable Value"]) || 0,
           igst: Number(r["IGST"]) || 0,
           cgst: Number(r["CGST"]) || 0,
           sgst: Number(r["SGST"]) || 0,

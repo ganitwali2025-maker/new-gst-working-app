@@ -16,6 +16,8 @@ const PAGE_META = {
   '/import': { title: 'Import', sub: 'Bring in your books and GSTR-2B data' },
   '/company': { title: 'Company / GSTIN', sub: 'Manage entities you audit' },
   '/settings': { title: 'Settings', sub: 'Matching rules and data controls' },
+  '/gstr1': { title: 'GSTR-1 Sales Register', sub: 'Detailed invoice-wise outward supply statement for GST return preparation.' },
+  '/gstr2b-gov': { title: 'GSTR-2B Gov', sub: 'Current month auto-drafted ITC statement' }
 };
 
 export default function Topbar({ toggleSidebar }) {
