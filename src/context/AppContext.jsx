@@ -87,16 +87,54 @@ export function AppProvider({ children }) {
     });
   };
 
-  const deleteRow = (type, rowId) => {
-    updateState({
-      [type]: state[type].filter(r => r.id !== rowId)
+  const SCRIPT_URL = state.settings?.scriptUrl || "https://script.google.com/macros/s/AKfycbzPN-BdSxYQ_QHA1JazBwYXUXSt8d505s2HknrX65VFEfRWii7McdYn_nquTSk2ipoz/exec";
+
+  const syncGstr1ToSheets = (gstr1Data) => {
+    // Sync all data for current active company so multiple months are saved
+    const companyData = gstr1Data.filter(r => r.companyId === state.activeCompanyId);
+    console.log('syncGstr1ToSheets called with', gstr1Data.length, 'rows. Filtered by companyId (', state.activeCompanyId, '):', companyData.length, 'rows.');
+    
+    const dataToSync = companyData.map(r => {
+      const taxable = Number(r.taxable) || 0;
+      const igst = Number(r.igst) || 0;
+      const cgst = Number(r.cgst) || 0;
+      const sgst = Number(r.sgst) || 0;
+      const cess = Number(r.cess) || 0;
+      const totalTax = igst + cgst + sgst + cess;
+      return {
+        id: r.id || "",
+        month: r.month || state.month,
+        quarter: r.quarter || "",
+        fy: r.fy || state.financialYear,
+        invoiceDate: r.invoiceDate || "",
+        supplierName: r.supplierName || "",
+        gstin: r.gstin || "",
+        invoiceNo: r.invoiceNo || "",
+        taxable, igst, cgst, sgst, totalTax,
+        totalInvoiceValue: taxable + totalTax
+      };
     });
+
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "SYNC_ALL", data: dataToSync })
+    })
+    .then(res => res.text())
+    .then(text => console.log("Google Apps Script response:", text))
+    .catch(e => console.error("Auto-sync error:", e));
   };
 
-  const updateRow = (type, rowId, newData) => {
-    updateState({
-      [type]: state[type].map(r => r.id === rowId ? { ...r, ...newData } : r)
-    });
+  const deleteRow = (type, rowId) => {
+    const newData = state[type].filter(r => r.id !== rowId);
+    updateState({ [type]: newData });
+    if (type === 'gstr1') syncGstr1ToSheets(newData);
+  };
+
+  const updateRow = (type, rowId, newDataObj) => {
+    const newData = state[type].map(r => r.id === rowId ? { ...r, ...newDataObj } : r);
+    updateState({ [type]: newData });
+    if (type === 'gstr1') syncGstr1ToSheets(newData);
   };
 
   const resolutions = state.resolutions || {};
@@ -126,6 +164,14 @@ export function AppProvider({ children }) {
     updateSettings({ theme: order[(idx + 1) % order.length] || 'light' });
   };
 
+  const getLockKey = (type) => `${state.activeCompanyId}|${state.financialYear}|${state.month}|${type}`;
+  const checkIsLocked = (type) => !!(state.locked && state.locked[getLockKey(type)]);
+  const toggleLock = (type) => {
+    const key = getLockKey(type);
+    const locked = state.locked || {};
+    updateState({ locked: { ...locked, [key]: !locked[key] } });
+  };
+
   const contextValue = {
     ...state,
     updateState,
@@ -142,6 +188,7 @@ export function AppProvider({ children }) {
     clearCurrentPeriod,
     deleteRow,
     updateRow,
+    syncGstr1ToSheets,
     loadSample,
     clearAllData,
     toggleTheme,
@@ -149,7 +196,9 @@ export function AppProvider({ children }) {
     resolveMismatch,
     undoResolve,
     FY_LIST,
-    MONTHS
+    MONTHS,
+    checkIsLocked,
+    toggleLock
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

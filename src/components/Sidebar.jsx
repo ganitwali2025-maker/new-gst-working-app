@@ -28,7 +28,7 @@ const NAV = [
   { id: 'gstr1', path: '/gstr1', label: 'GST R-1', icon: Landmark },
 
   { isHeading: true, label: 'SETTINGS' },
-  { id: 'import', path: '/import', label: 'Import', icon: Upload },
+
   { id: 'company', path: '/company', label: 'Company / GSTIN', icon: Building2 },
   { id: 'settings', path: '/settings', label: 'Settings', icon: Settings },
 ];

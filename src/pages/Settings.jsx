@@ -60,12 +60,33 @@ export default function Settings() {
         <div className="settings-row">
           <div>
             <div className="t1">Normalize invoice numbers</div>
-            <div className="t2">Ignore spaces, hyphens and case when matching invoice numbers</div>
+            <div className="t2">Ignore special characters and zeroes when matching</div>
           </div>
-          <label className="switch">
-            <input type="checkbox" checked={settings.normalizeInvoice} onChange={handleNormToggle} />
-            <span className="slider-tog"></span>
+          <label className="toggle">
+            <input type="checkbox" checked={settings.normalizeInvoice || false} onChange={handleNormToggle} />
+            <span className="slider"></span>
           </label>
+        </div>
+      </div>
+
+      <div className="panel">
+        <h3 style={{ marginTop: 0 }}>Integrations</h3>
+        <div className="settings-row">
+          <div>
+            <div className="t1">Google Sheets Web App URL</div>
+            <div className="t2">Paste your Apps Script URL to enable live syncing</div>
+          </div>
+          <input 
+            type="text" 
+            className="ctrl" 
+            style={{ width: '400px' }}
+            placeholder="https://script.google.com/macros/s/.../exec"
+            value={settings.scriptUrl || ''} 
+            onChange={(e) => {
+              updateSettings({ scriptUrl: e.target.value.trim() });
+            }} 
+            onBlur={() => showToast('Saved integration URL')}
+          />
         </div>
       </div>
 
@@ -89,13 +110,6 @@ export default function Settings() {
             <Trash2 size={14} /> Clear everything
           </button>
         </div>
-      </div>
-
-      <div className="panel">
-        <h3 style={{ marginTop: 0 }}>About</h3>
-        <p style={{ color: 'var(--muted)', fontSize: '12.5px' }}>
-          ReconIQ matches your books purchase register against GSTR-2B by GSTIN and invoice number, then flags mismatches, missing invoices and duplicates so you can close ITC gaps before filing. All data stays in this browser — nothing is uploaded anywhere.
-        </p>
       </div>
     </>
   );

@@ -275,7 +275,7 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
   );
 };
 
-export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType }) {
+export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, type }) {
   const [auditRow, setAuditRow] = useState(null);
   const [resolveRow, setResolveRow] = useState(null);
   const [viewMatchRow, setViewMatchRow] = useState(null);
@@ -283,14 +283,8 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType })
   
   if (!rows || rows.length === 0) {
     return (
-      <div className="table-wrap">
-        <table>
-          <tbody>
-            <tr className="empty-row">
-              <td>No rows found.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)', fontSize: '15px' }}>
+        No rows found.
       </div>
     );
   }
@@ -314,24 +308,78 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType })
       <table>
         <thead>
           <tr>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Invoice No.</th>
-            <th>Date</th>
-            <th>{isBooks ? 'Supplier' : 'Supplier'} GSTIN</th>
-            <th>Supplier Name</th>
-            <th className="num">Taxable</th>
-            <th className="num">IGST</th>
-            <th className="num">CGST</th>
-            <th className="num">SGST</th>
-            <th className="num">Cess</th>
-            <th className="num">Total</th>
+            {type === 'gstr1' ? (
+              <>
+                <th>Month</th>
+                <th>Quarter</th>
+                <th>Financial Year</th>
+                <th>Invoice Date</th>
+                <th>Supplier / Party Name</th>
+                <th>GST No</th>
+                <th>Invoice No</th>
+                <th className="num" style={{textAlign: "center"}}>Taxable Value</th>
+                <th className="num" style={{textAlign: "center"}}>IGST</th>
+                <th className="num" style={{textAlign: "center"}}>CGST</th>
+                <th className="num" style={{textAlign: "center"}}>SGST</th>
+                <th className="num" style={{textAlign: "center"}}>Total Tax</th>
+                <th className="num" style={{textAlign: "center"}}>Total Invoice Value</th>
+              </>
+            ) : (
+              <>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Invoice No.</th>
+                <th>Date</th>
+                <th>{isBooks ? 'Supplier' : 'Supplier'} GSTIN</th>
+                <th>Supplier Name</th>
+                <th className="num" style={{textAlign: "center"}}>Taxable</th>
+                <th className="num" style={{textAlign: "center"}}>IGST</th>
+                <th className="num" style={{textAlign: "center"}}>CGST</th>
+                <th className="num" style={{textAlign: "center"}}>SGST</th>
+                <th className="num" style={{textAlign: "center"}}>Cess</th>
+                <th className="num" style={{textAlign: "center"}}>Total</th>
+              </>
+            )}
             {dataType && <th style={{ width: '60px', textAlign: 'center' }}>ACTION</th>}
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => {
             const meta = STATUS_META[r.recoStatus] || { cls: 'grey', dot: 'grey' };
+            if (type === 'gstr1') {
+              return (
+                <tr key={r.id || i}>
+                  <td>{esc(r.month)}</td>
+                  <td>{esc(r.quarter) || 'Q'}</td>
+                  <td>{esc(r.fy)}</td>
+                  <td>{esc(r.invoiceDate)}</td>
+                  <td>{esc(r.supplierName)}</td>
+                  <td className="mono">{esc(r.gstin)}</td>
+                  <td>{esc(r.invoiceNo)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.taxable)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(taxTotal(r))}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
+                  {dataType && (
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setAuditRow(r)} title="View Row">
+                          <Eye size={15} />
+                        </button>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--blue)' }} onClick={() => setAuditRow(r)} title="Audit/Edit Row">
+                          <Edit2 size={15} />
+                        </button>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--red)' }} onClick={() => { if (window.confirm('Are you sure you want to delete this row?')) deleteRow(dataType, r.id); }} title="Delete Row">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              );
+            }
             return (
             <tr key={r.id || i}>
               <td>{getPriorityBadge(r)}</td>
@@ -348,12 +396,12 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType })
               <td>{esc(r.invoiceDate)}</td>
               <td className="mono">{esc(r.gstin)}</td>
               <td>{esc(r.supplierName)}</td>
-              <td className="num">{fmtNum(r.taxable)}</td>
-              <td className="num">{fmtNum(r.igst)}</td>
-              <td className="num">{fmtNum(r.cgst)}</td>
-              <td className="num">{fmtNum(r.sgst)}</td>
-              <td className="num">{fmtNum(r.cess)}</td>
-              <td className="num">{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
+              <td className="num" style={{textAlign: "center"}}>{fmtNum(r.taxable)}</td>
+              <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
+              <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
+              <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
+              <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>
+              <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
               {dataType && (
                 <td style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>

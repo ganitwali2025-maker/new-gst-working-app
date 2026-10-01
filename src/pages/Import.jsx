@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Sparkles } from 'lucide-react';
+import { Upload, Sparkles, Clipboard } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -45,7 +45,7 @@ export default function Import() {
   const queryParams = new URLSearchParams(location.search);
   const initialTarget = queryParams.get('target') || 'books';
 
-  const { activeCompany, month, financialYear, activeCompanyId, updateState, loadSample, books, gstr2b, gstr2b_gov, rcm, gstr1 } = useAppContext();
+  const { activeCompany, month, financialYear, activeCompanyId, updateState, loadSample, books, gstr2b, gstr2b_gov, rcm, gstr1, syncGstr1ToSheets } = useAppContext();
   const { showToast } = useToast();
 
   const [target, setTarget] = useState(initialTarget);
@@ -87,7 +87,7 @@ export default function Import() {
         try {
           const wb = XLSX.read(e.target.result, { type: 'array' });
           const ws = wb.Sheets[wb.SheetNames[0]];
-          const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+          const json = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false, dateNF: 'dd/mm/yyyy' });
           const headers = json.length ? Object.keys(json[0]) : [];
           setImportState({
             headers,
@@ -103,12 +103,53 @@ export default function Import() {
     }
   };
 
+  const parseInvoiceDate = (dateStr) => {
+    if (!dateStr) return null;
+    let d;
+    const parts = String(dateStr).trim().split(/[-/]/);
+    if (parts.length === 3) {
+       if (parts[0].length === 4) {
+         d = new Date(parts[0], parseInt(parts[1])-1, parts[2]);
+       } else if (parts[2].length === 4) {
+         if (isNaN(parseInt(parts[1]))) {
+            d = new Date(dateStr); 
+         } else {
+            d = new Date(parts[2], parseInt(parts[1])-1, parts[0]); 
+         }
+       } else {
+         d = new Date(dateStr);
+       }
+    } else {
+      d = new Date(dateStr);
+    }
+    if (isNaN(d.getTime())) return null;
+    const m = d.getMonth();
+    const y = d.getFullYear();
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthName = monthNames[m];
+    let quarter = '';
+    let fyStr = '';
+    if (m >= 3) { 
+      if (m >= 3 && m <= 5) quarter = 'Q1';
+      else if (m >= 6 && m <= 8) quarter = 'Q2';
+      else quarter = 'Q3';
+      fyStr = 'FY ' + y + '-' + (y+1).toString().slice(-2);
+    } else { 
+      quarter = 'Q4';
+      fyStr = 'FY ' + (y-1) + '-' + y.toString().slice(-2);
+    }
+    return { month: monthName, quarter, fy: fyStr };
+  };
+
   const mapRow = (row, mapping) => {
     const g = key => key ? row[key] : '';
+    const rawDate = g(mapping.invoiceDate);
+    const dateInfo = parseInvoiceDate(rawDate) || { month: '', quarter: '', fy: '' };
     return {
-      invoiceNo: g(mapping.invoiceNo), invoiceDate: g(mapping.invoiceDate), gstin: g(mapping.gstin), supplierName: g(mapping.supplierName),
+      invoiceNo: g(mapping.invoiceNo), invoiceDate: rawDate, gstin: g(mapping.gstin), supplierName: g(mapping.supplierName),
       taxable: parseNum(g(mapping.taxable)), igst: parseNum(g(mapping.igst)), cgst: parseNum(g(mapping.cgst)), sgst: parseNum(g(mapping.sgst)), cess: parseNum(g(mapping.cess)),
       supplierType: mapping.supplierType ? g(mapping.supplierType) : '', gstr1Filed: mapping.gstr1Filed ? g(mapping.gstr1Filed) : '',
+      month: dateInfo.month, quarter: dateInfo.quarter, fy: dateInfo.fy
     };
   };
 
@@ -125,7 +166,14 @@ export default function Import() {
 
     const newRows = rawRows.map(row => {
       const mapped = mapRow(row, mapping);
-      return { id: uid(), companyId: activeCompanyId, fy: financialYear, month, ...mapped };
+      return { 
+        id: uid(), 
+        companyId: activeCompanyId, 
+        fy: mapped.fy || financialYear, 
+        month: mapped.month || month, 
+        quarter: mapped.quarter || '',
+        ...mapped 
+      };
     }).filter(r => r.invoiceNo);
 
     const storeKey = target === 'books' ? 'books' : target === 'rcm' ? 'rcm' : target === 'gstr1' ? 'gstr1' : target === 'gstr2b_gov' ? 'gstr2b_gov' : 'gstr2b';
@@ -139,6 +187,11 @@ export default function Import() {
     }
     
     updatedData = [...updatedData, ...newRows];
+    
+    // Add Google sheets sync if GSTR-1
+    if (target === 'gstr1') {
+      syncGstr1ToSheets(updatedData);
+    }
     
     updateState({ [storeKey]: updatedData });
     setImportState({ headers: [], rawRows: [], mapping: {}, replace: false });
@@ -164,6 +217,28 @@ export default function Import() {
     if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('Text');
+    if (!text) return;
+    Papa.parse(text, {
+      header: true, skipEmptyLines: true,
+      complete: (res) => {
+        if (!res.data.length || !res.meta.fields) {
+          showToast('Could not read pasted data. Make sure to copy headers too.');
+          return;
+        }
+        setImportState({
+          headers: res.meta.fields,
+          rawRows: res.data,
+          mapping: autoGuessMapping(res.meta.fields, target),
+          replace: false
+        });
+      },
+      error: () => showToast('Could not read pasted data.')
+    });
+  };
+
   const renderMapping = () => {
     const { headers, rawRows, mapping, replace } = importState;
     const fields = getTargetFields(target);
@@ -181,44 +256,46 @@ export default function Import() {
 
     return (
       <div id="mappingArea">
-        <div className="section-title">Map columns — {kindLabel}</div>
-        <div className="map-grid">
-          {fields.map(f => (
-            <div className="map-row" key={f.key}>
-              <label className={f.req ? 'field-req' : ''}>{f.label}</label>
-              <select 
-                className="ctrl" 
-                value={mapping[f.key] || ''}
-                onChange={(e) => setImportState({ ...importState, mapping: { ...mapping, [f.key]: e.target.value } })}
-              >
-                <option value="">— not in file —</option>
-                {headers.map(h => (
-                  <option key={h} value={h}>{h}</option>
-                ))}
-              </select>
-            </div>
-          ))}
+        {/* HIDING MAPPING UI AS REQUESTED BY USER */}
+        <div style={{ display: 'none' }}>
+          <div className="section-title">Map columns — {kindLabel}</div>
+          <div className="map-grid">
+            {fields.map(f => (
+              <div className="map-row" key={f.key}>
+                <label className={f.req ? 'field-req' : ''}>{f.label}</label>
+                <select 
+                  className="ctrl" 
+                  value={mapping[f.key] || ''}
+                  onChange={(e) => setImportState({ ...importState, mapping: { ...mapping, [f.key]: e.target.value } })}
+                >
+                  <option value="">— not in file —</option>
+                  {headers.map(h => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          
+          <div className="flex" style={{ alignItems: 'center', gap: '8px', margin: '12px 0' }}>
+            <label className="switch">
+              <input 
+                type="checkbox" 
+                checked={replace} 
+                onChange={(e) => setImportState({ ...importState, replace: e.target.checked })}
+              />
+              <span className="slider-tog"></span>
+            </label>
+            <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>Replace existing {kindLabel} rows for this period before importing</span>
+          </div>
         </div>
-        
-        <div className="flex" style={{ alignItems: 'center', gap: '8px', margin: '12px 0' }}>
-          <label className="switch">
-            <input 
-              type="checkbox" 
-              checked={replace} 
-              onChange={(e) => setImportState({ ...importState, replace: e.target.checked })}
-            />
-            <span className="slider-tog"></span>
-          </label>
-          <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>Replace existing {kindLabel} rows for this period before importing</span>
-        </div>
-        
         <div className="panel-head">
           <h3 style={{ fontSize: '13.5px' }}>Preview (first 5 rows)</h3>
           <div className="hint">{fmtNum(rawRows.length)} rows detected in file</div>
         </div>
         
         <div id="previewWrap">
-          <DataTable rows={sample} isBooks={target !== 'gstr2b'} isRcm={target === 'rcm'} />
+          <DataTable rows={sample} isBooks={target !== 'gstr2b'} isRcm={target === 'rcm'} type={target} />
         </div>
         
         <div style={{ marginTop: '14px', display: 'flex', gap: '10px' }}>
@@ -252,21 +329,15 @@ export default function Import() {
       
       {!importState.headers.length && (
         <div className="import-grid">
-          <label 
-            className="dropzone" 
-            onDragOver={handleDragOver} 
-            onDrop={handleDrop}
-          >
-            <Upload size={26} style={{ color: 'var(--muted)', marginBottom: '10px' }} />
-            <div className="t1">Drop a CSV or Excel file here</div>
-            <div className="t2">or click to browse · .csv, .xlsx, .xls</div>
-            <input 
-              type="file" 
-              accept=".csv,.xlsx,.xls" 
-              style={{ display: 'none' }} 
-              onChange={(e) => { if (e.target.files[0]) handleFile(e.target.files[0]); }}
+          <div className="dropzone" style={{ display: 'flex', flexDirection: 'column', padding: '20px', alignItems: 'center' }}>
+            <Clipboard size={26} style={{ color: 'var(--muted)', marginBottom: '10px' }} />
+            <div className="t1">Paste your Excel data here</div>
+            <textarea 
+              placeholder="Click here and press Ctrl+V"
+              style={{ width: '100%', height: '120px', resize: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '10px', fontSize: '13px', marginTop: '15px' }}
+              onPaste={handlePaste}
             />
-          </label>
+          </div>
           <div className="panel" style={{ margin: 0 }}>
             <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>What happens next</div>
             <ol style={{ margin: 0, paddingLeft: '18px', color: 'var(--muted)', fontSize: '12.5px', lineHeight: 1.9 }}>

@@ -63,7 +63,7 @@ function MainLayout() {
             
             <Route path="/rcmdata" element={<RcmData />} />
             <Route path="/books-itc" element={<GenericTablePage title="Books ITC" type="books" hint="ITC from books" />} />
-            <Route path="/gstr1" element={<GenericTablePage title="GST R-1" type="books" hint="GSTR-1 data" />} />
+            <Route path="/gstr1" element={<GenericTablePage title="GST R-1" type="gstr1" hint="GSTR-1 data" />} />
             
             <Route path="/reports" element={<Reports />} />
             <Route path="/reco-report" element={<GenericTablePage title="Reconciliation Report" type="books" hint="Detailed reco report" />} />
