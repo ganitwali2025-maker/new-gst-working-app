@@ -308,7 +308,7 @@ export default function ImportBox({ target = 'books' }) {
 
   return (
     <>
-      <button className="btn outline" onClick={() => setIsOpen(true)}>
+      <button className="btn" style={{ background: "linear-gradient(90deg, #3B82F6, #2563EB)", color: "#fff", border: "none", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }} onClick={() => setIsOpen(true)}>
         <Upload size={14} /> Import
       </button>
 
