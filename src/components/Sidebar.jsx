@@ -115,32 +115,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div id="sidebar-foot" style={{ marginTop: 'auto', paddingTop: '12px' }}>
-        <div className="company-info-card" style={{
-          display: 'flex', alignItems: 'center', gap: '10px',
-          background: 'rgba(255,255,255,0.08)', padding: '10px 12px',
-          borderRadius: '10px', cursor: 'pointer', transition: '0.2s', border: '1px solid rgba(255,255,255,0.1)'
-        }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '8px',
-            background: 'var(--accent)', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '600', fontSize: '14px', flex: 'none',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
-          }}>
-            {activeCompany?.name ? activeCompany.name.charAt(0).toUpperCase() : 'A'}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '13px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {activeCompany?.name || 'Company Name'}
-            </div>
-            <div style={{ fontSize: '11.5px', color: '#c4b5fd', marginTop: '1px' }}>
-              FY {financialYear || '2026-27'} | {month || 'Sep'}
-            </div>
-          </div>
-          <ChevronRight size={16} color="#a78bfa" />
-        </div>
-      </div>
     </aside>
   );
 }
