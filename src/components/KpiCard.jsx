@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity } from 'lucide-react';
 
-export default function KpiCard({ label, val, sub, color, icon: CustomIcon, small, onClick, active }) {
+export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon: CustomIcon, small, onClick, active }) {
   let Icon = CustomIcon;
   if (!Icon) {
     const l = (label || '').toLowerCase();
@@ -16,10 +16,28 @@ export default function KpiCard({ label, val, sub, color, icon: CustomIcon, smal
     else Icon = Activity;
   }
 
-  const softColor = color ? color.replace(')', '-soft)') : 'var(--panel-2)';
-  const iconColor = color || 'var(--muted)';
-  const badgeSize = small ? '28px' : '40px';
-  const iconSize = small ? 14 : 22;
+  const getGradient = (c) => {
+    if(c.includes('accent')) return 'linear-gradient(135deg, #f5f3ff, #ede9fe)';
+    if(c.includes('blue')) return 'linear-gradient(135deg, #eff6ff, #dbeafe)';
+    if(c.includes('green')) return 'linear-gradient(135deg, #ecfdf5, #d1fae5)';
+    if(c.includes('yellow')) return 'linear-gradient(135deg, #fffbeb, #fef3c7)';
+    if(c.includes('purple')) return 'linear-gradient(135deg, #faf5ff, #f3e8ff)';
+    if(c.includes('red')) return 'linear-gradient(135deg, #fef2f2, #fee2e2)';
+    return 'var(--panel)';
+  }
+
+  const getIconGradient = (c) => {
+    if(c.includes('accent')) return 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+    if(c.includes('blue')) return 'linear-gradient(135deg, #3b82f6, #2563eb)';
+    if(c.includes('green')) return 'linear-gradient(135deg, #10b981, #059669)';
+    if(c.includes('yellow')) return 'linear-gradient(135deg, #f59e0b, #d97706)';
+    if(c.includes('purple')) return 'linear-gradient(135deg, #a855f7, #9333ea)';
+    if(c.includes('red')) return 'linear-gradient(135deg, #ef4444, #dc2626)';
+    return c;
+  }
+
+  const badgeSize = small ? '34px' : '44px';
+  const iconSize = small ? 16 : 22;
 
   return (
     <div 
@@ -27,23 +45,36 @@ export default function KpiCard({ label, val, sub, color, icon: CustomIcon, smal
       onClick={onClick}
       style={{
         cursor: onClick ? 'pointer' : 'default',
-        border: active ? `2px solid ${color}` : undefined,
+        background: active ? getGradient(color) : 'var(--panel)',
+        border: active ? `2px solid ${color}` : '1px solid var(--border-soft)',
+        borderTop: `4px solid ${color.includes('var(') ? color : 'var(--accent)'}`,
         transform: active ? 'scale(1.02)' : undefined,
-        boxShadow: active ? '0 4px 12px rgba(0,0,0,0.1)' : undefined
+        boxShadow: active ? '0 8px 16px rgba(0,0,0,0.08)' : '0 2px 4px rgba(0,0,0,0.04)',
+        transition: 'all 0.2s ease',
+        position: 'relative',
+        overflow: 'hidden'
       }}
     >
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        width: badgeSize, height: badgeSize, borderRadius: small ? '7px' : '10px',
-        backgroundColor: softColor,
-        color: iconColor,
-        marginBottom: small ? '8px' : '12px'
-      }}>
-        <Icon size={iconSize} />
+        position: 'absolute', top: 0, right: 0, bottom: 0, width: '100px',
+        background: getGradient(color), opacity: 0.5, borderRadius: '100% 0 0 100%',
+        transform: 'translateX(30%)'
+      }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: badgeSize, height: badgeSize, borderRadius: '12px',
+          background: getIconGradient(color),
+          color: '#ffffff',
+          marginBottom: small ? '10px' : '14px',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+        }}>
+          <Icon size={iconSize} strokeWidth={2.5} />
+        </div>
+        <div className="lbl" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{label}</div>
+        <div className="val" style={{ color: color.includes('var(') ? color : 'var(--accent)', textShadow: '0 1px 1px rgba(0,0,0,0.05)' }}>{val}</div>
+        <div className="delta" style={{ color: 'var(--muted)', fontWeight: 500 }}>{sub}</div>
       </div>
-      <div className="lbl">{label}</div>
-      <div className="val">{val}</div>
-      <div className="delta" style={{ color: 'var(--muted)' }}>{sub}</div>
     </div>
   );
 }
