@@ -83,7 +83,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         </div>
         <div>
           <div className="brand-name" style={{ fontSize: '15px' }}>GST RecoManager</div>
-          <div className="brand-sub" style={{ fontSize: '10px', lineHeight: '1.2' }}>Smart Reconciliation. Accurate ITC.<br/>Complete GST Control.</div>
+          
         </div>
       </div>
 
