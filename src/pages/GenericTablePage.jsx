@@ -72,10 +72,10 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
   return (
     <>
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: '24px' }}>
-        <KpiCard small label="Total Taxable" val={fmtINR(totalTaxable)} sub="Sum for this period" color="var(--accent)" />
-        <KpiCard small label="Total IGST" val={fmtINR(totalIgst)} sub="Integrated GST" color="var(--blue)" />
-        <KpiCard small label="Total CGST" val={fmtINR(totalCgst)} sub="Central GST" color="var(--green)" />
-        <KpiCard small label="Total SGST" val={fmtINR(totalSgst)} sub="State GST" color="var(--yellow)" />
+        <KpiCard small label="Total Taxable" val={fmtINR(totalTaxable)} sub={"Sum for " + (month || "this period")} color="var(--accent)" />
+        <KpiCard small label="Total IGST" val={fmtINR(totalIgst)} sub={"Integrated GST (" + month + ")"} color="var(--blue)" />
+        <KpiCard small label="Total CGST" val={fmtINR(totalCgst)} sub={"Central GST (" + month + ")"} color="var(--green)" />
+        <KpiCard small label="Total SGST" val={fmtINR(totalSgst)} sub={"State GST (" + month + ")"} color="var(--yellow)" />
         <KpiCard small label="Total GST" val={fmtINR(totalGst)} sub="All taxes combined" color="var(--purple)" />
       </div>
 
