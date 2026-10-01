@@ -16,7 +16,7 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
   let rows = [];
   if (type === 'books') rows = currentBooks;
   else if (type === 'g2b') rows = currentGstr2b;
-  else if (type === 'gstr1') rows = gstr1.filter(r => r.companyId === activeCompanyId);
+  else if (type === 'gstr1') rows = currentGstr1;
 
   const totalTaxable = rows.reduce((a, r) => a + Number(r.taxable || 0), 0);
   const totalIgst = rows.reduce((a, r) => a + Number(r.igst || 0), 0);
