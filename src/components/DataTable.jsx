@@ -280,14 +280,6 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
   const [resolveRow, setResolveRow] = useState(null);
   const [viewMatchRow, setViewMatchRow] = useState(null);
   const { updateRow, deleteRow, resolveMismatch, undoResolve, resolutions } = useAppContext();
-  
-  if (!rows || rows.length === 0) {
-    return (
-      <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)', fontSize: '15px' }}>
-        No rows found.
-      </div>
-    );
-  }
 
   const getPriorityBadge = (r) => {
     const issues = rowDataIssues(r);
@@ -344,7 +336,13 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
           </tr>
         </thead>
         <tbody>
-          {rows.map((r, i) => {
+          {(!rows || rows.length === 0) ? (
+            <tr>
+              <td colSpan={100} style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)', fontSize: '15px' }}>
+                No rows found.
+              </td>
+            </tr>
+          ) : rows.map((r, i) => {
             const meta = STATUS_META[r.recoStatus] || { cls: 'grey', dot: 'grey' };
             if (type === 'gstr1') {
               return (
