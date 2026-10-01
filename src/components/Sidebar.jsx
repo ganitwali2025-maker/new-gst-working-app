@@ -54,7 +54,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         style={{ 
           position: 'absolute', 
           top: '27px', 
-          right: '-12px', 
+          right: '14px', 
           width: '24px', 
           height: '24px', 
           background: '#ffffff', 
