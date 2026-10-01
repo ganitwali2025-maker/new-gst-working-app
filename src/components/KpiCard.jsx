@@ -61,12 +61,12 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
         cursor: onClick ? 'pointer' : 'default',
         background: 'var(--panel)',
         border: 'none',
-        borderTop: `4px solid ${color.includes('var(') ? color : 'var(--accent)'}`,
         transform: active ? 'scale(1.02)' : undefined,
         boxShadow: getGlow(color),
         transition: 'all 0.2s ease',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        borderRadius: '12px'
       }}
     >
       <div style={{ position: 'relative', zIndex: 1 }}>
