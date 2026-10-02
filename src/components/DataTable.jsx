@@ -281,6 +281,15 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
   const [viewMatchRow, setViewMatchRow] = useState(null);
   const { updateRow, deleteRow, resolveMismatch, undoResolve, resolutions } = useAppContext();
 
+  const safeRows = rows || [];
+  const totalTaxable = safeRows.reduce((sum, r) => sum + (Number(r.taxable) || 0), 0);
+  const totalIgst = safeRows.reduce((sum, r) => sum + (Number(r.igst) || 0), 0);
+  const totalCgst = safeRows.reduce((sum, r) => sum + (Number(r.cgst) || 0), 0);
+  const totalSgst = safeRows.reduce((sum, r) => sum + (Number(r.sgst) || 0), 0);
+  const totalCess = safeRows.reduce((sum, r) => sum + (Number(r.cess) || 0), 0);
+  const totalTax = safeRows.reduce((sum, r) => sum + taxTotal(r), 0);
+  const totalInvoice = totalTaxable + totalTax;
+
   const getPriorityBadge = (r) => {
     const issues = rowDataIssues(r);
     const attention = !!opts.forceAttention || issues.length > 0;
