@@ -174,7 +174,7 @@ export default function Import() {
         quarter: mapped.quarter || '',
         ...mapped 
       };
-    }).filter(r => r.invoiceNo);
+    }).filter(r => target === 'rcm' ? (r.lrNo || r.entryDate || r.transporterName || r.taxable || r.amount) : r.invoiceNo);
 
     const storeKey = target === 'books' ? 'books' : target === 'rcm' ? 'rcm' : target === 'gstr1' ? 'gstr1' : target === 'gstr2b_gov' ? 'gstr2b_gov' : 'gstr2b';
     let updatedData = [];

@@ -18,30 +18,48 @@ const TARGET_FIELDS_BASE = [
 ];
 
 const TARGET_FIELDS_G2B_EXTRA = [
-  {key:'supplierType', label:'Supplier Type (Government/Regular)', req:false},
-  {key:'gstr1Filed', label:'GSTR-1 Filed (Yes/No)', req:false},
+  {key:'invoiceValue', label:'Invoice Value (?)', req:false},
+  {key:'remark', label:'Remark', req:false},
 ];
 
-const GUESS = {
-  invoiceNo:['invoice no','invoice number','inv no','invno','invoice_no'],
-  invoiceDate:['invoice date','date','inv date','invoice_date'],
-  gstin:['gstin','supplier gstin','gst no','supplier gst'],
-  supplierName:['supplier name','supplier','vendor','vendor name','party name','name'],
-  taxable:['taxable value','taxable','taxable amt','taxable_value'],
-  igst:['igst'], cgst:['cgst'], sgst:['sgst'], cess:['cess'],
-  supplierType:['supplier type','type','category','govt','government'],
-  gstr1Filed:['gstr-1 filed','gstr1 filed','filing status','filed'],
-};
+const TARGET_FIELDS_RCM = [
+  {key:'entryDate', label:'Entry Date', req:true},
+  {key:'transporterName', label:'Transporter Name', req:false},
+  {key:'lrNo', label:'Transporter L.R. No.', req:false},
+  {key:'taxable', label:'Amount', req:true},
+  {key:'igst', label:'IGST', req:false},
+  {key:'cgst', label:'CGST', req:false},
+  {key:'sgst', label:'SGST', req:false},
+];
 
-function parseNum(v){ const n = parseFloat(String(v).replace(/,/g,'')); return isNaN(n) ? 0 : n; }
+    const GUESS = {
+    invoiceNo:['invoice no','invoice number','inv no','invno','invoice_no'],
+    invoiceDate:['invoice date','date','inv date','invoice_date'],
+    gstin:['gstin','supplier gstin','gst no','gst no.','supplier gst'],
+    supplierName:['supplier name','name of supplier','vendor','vendor name','party name','trade / legal name', 'trade name', 'legal name', 'trade/legal name'],
+    taxable:['taxable value','taxable','taxable amt','taxable_value', 'besic as per book', 'basic as per book', 'amount'],
+    igst:['igst', 'integrated tax', 'igst 5%'], 
+    cgst:['cgst', 'central tax', 'cgst 2.5%'], 
+    sgst:['sgst', 'state tax', 'sgst 2.5%'], 
+    cess:['cess'],
+    remark:['remark','remarks'],
+    invoiceValue:['invoice value','total invoice value','invoice value (\u20b9)'],
+    entryDate:['entry date', 'date'],
+    transporterName:['transporter name', 'transporter', 'party name', 'name of supplier'],
+    lrNo:['transporter l.r. no.', 'l.r. no', 'lr no', 'lr number', 'receipt no'],
+    supplierType:['supplier type','type','category','govt','government'],
+    gstr1Filed:['gstr-1 filed','gstr1 filed','filing status','filed'],
+  };
 
-export default function ImportBox({ target = 'books' }) {
-  const { activeCompanyId, month, financialYear, updateState, books, gstr2b, gstr2b_gov, rcm, gstr1, syncGstr1ToSheets, MONTHS, FY_LIST } = useAppContext();
-  const { showToast } = useToast();
+function parseNum(v: any){ const n = parseFloat(String(v).replace(/[,?Rs]/g,'')); return isNaN(n) ? 0 : n; }
+
+export default function ImportBox({ target = 'books' }: { target?: string }) {
+  const { activeCompanyId, month, financialYear, updateState, books, gstr2b, gstr2b_gov, rcm, gstr1, syncGstr1ToSheets, syncBooksToSheets, syncRcmToSheets, syncGstr2bGovToSheets, MONTHS, FY_LIST } = useAppContext() as any;
+  const { showToast } = useToast() as any;
   
   const [importing, setImporting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [pastedData, setPastedData] = useState({ headers: [], rawRows: [] });
+  const [pastedData, setPastedData] = useState<{ headers: string[], rawRows: any[] }>({ headers: [], rawRows: [] });
   const [pasteText, setPasteText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [replace, setReplace] = useState(false);
@@ -50,30 +68,33 @@ export default function ImportBox({ target = 'books' }) {
   const [importQuarter, setImportQuarter] = useState('');
   const [importFy, setImportFy] = useState(financialYear || '');
 
-  const getTargetFields = (kind) => (kind === 'gstr2b' || kind === 'gstr2b_gov') ? [...TARGET_FIELDS_BASE, ...TARGET_FIELDS_G2B_EXTRA] : TARGET_FIELDS_BASE;
+  const getTargetFields = (kind: string) => (kind === 'gstr2b' || kind === 'gstr2b_gov' || kind === 'g2b_gov') ? [...TARGET_FIELDS_BASE, ...TARGET_FIELDS_G2B_EXTRA] : (kind === 'rcm' ? TARGET_FIELDS_RCM : TARGET_FIELDS_BASE);
 
-  const autoGuessMapping = (headers, kind) => {
-    const mapping = {};
-    getTargetFields(kind).forEach(f => {
-      const guesses = GUESS[f.key] || [];
-      const found = headers.find(h => guesses.includes(String(h).trim().toLowerCase()));
+        const autoGuessMapping = (headers: string[], kind: string) => {
+    const mapping: Record<string, string> = {};
+    getTargetFields(kind).forEach((f: any) => {
+      const guesses = (GUESS as any)[f.key] || [];
+      const found = headers.find((h: any) => {
+        const cleanH = String(h).trim().toLowerCase().replace(/\s+/g, ' ');
+        return guesses.includes(cleanH) || guesses.some((g: any) => cleanH.includes(g.replace(/\s+/g, ' ')));
+      });
       mapping[f.key] = found || '';
     });
     return mapping;
   };
 
-  const parseInvoiceDate = (dateStr) => {
+  const parseInvoiceDate = (dateStr: any) => {
     if (!dateStr) return null;
     let d;
     const parts = String(dateStr).trim().split(/[-/]/);
     if (parts.length === 3) {
        if (parts[0].length === 4) {
-         d = new Date(parts[0], parseInt(parts[1])-1, parts[2]);
+         d = new Date(Number(parts[0]), parseInt(parts[1])-1, Number(parts[2]));
        } else if (parts[2].length === 4) {
          if (isNaN(parseInt(parts[1]))) {
             d = new Date(dateStr); 
          } else {
-            d = new Date(parts[2], parseInt(parts[1])-1, parts[0]); 
+            d = new Date(Number(parts[2]), parseInt(parts[1])-1, Number(parts[0])); 
          }
        } else {
          d = new Date(dateStr);
@@ -100,21 +121,34 @@ export default function ImportBox({ target = 'books' }) {
     return { month: monthName, quarter, fy: fyStr };
   };
 
-  const mapRow = (row, mapping) => {
-    const g = key => key ? row[key] : '';
-    const rawDate = g(mapping.invoiceDate);
+  const mapRow = (row: any, mapping: any) => {
+    const g = (key: string) => key ? row[key] : '';
+    const rawDate = g(mapping.invoiceDate) || g(mapping.entryDate);
     const dateInfo = parseInvoiceDate(rawDate) || { month: '', quarter: '', fy: '' };
     return {
-      invoiceNo: g(mapping.invoiceNo), invoiceDate: rawDate, gstin: g(mapping.gstin), supplierName: g(mapping.supplierName),
-      taxable: parseNum(g(mapping.taxable)), igst: parseNum(g(mapping.igst)), cgst: parseNum(g(mapping.cgst)), sgst: parseNum(g(mapping.sgst)), cess: parseNum(g(mapping.cess)),
-      supplierType: mapping.supplierType ? g(mapping.supplierType) : '', gstr1Filed: mapping.gstr1Filed ? g(mapping.gstr1Filed) : '',
+      invoiceNo: g(mapping.invoiceNo), 
+      invoiceDate: rawDate, 
+      entryDate: g(mapping.entryDate),
+      transporterName: g(mapping.transporterName) || g(mapping.supplierName),
+      lrNo: g(mapping.lrNo) || g(mapping.invoiceNo),
+      gstin: g(mapping.gstin), 
+      supplierName: g(mapping.supplierName) || g(mapping.transporterName),
+      taxable: parseNum(g(mapping.taxable)), 
+      amount: parseNum(g(mapping.taxable)),
+      igst: parseNum(g(mapping.igst)), 
+      cgst: parseNum(g(mapping.cgst)), 
+      sgst: parseNum(g(mapping.sgst)), 
+      cess: parseNum(g(mapping.cess)),
+      invoiceValue: parseNum(g(mapping.invoiceValue)),
+      remark: g(mapping.remark),
       month: importMonth || dateInfo.month, 
       quarter: importQuarter || dateInfo.quarter, 
       fy: importFy || dateInfo.fy
     };
   };
+
   
-  const parseCustomFormat = (text) => {
+  const parseCustomFormat = (text: string) => {
     // 1. Flatten all whitespace and newlines into single spaces
     const flatText = text.replace(/\s+/g, ' ').trim();
     
@@ -122,7 +156,7 @@ export default function ImportBox({ target = 'books' }) {
     // we strictly require a space before the date (or it being the start of the string).
     const chunks = flatText.split(/(?= \d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b)/).map(s => s.trim()).filter(s => s);
     
-    const parsedRows = [];
+    const parsedRows: any[] = [];
     
     for (let chunk of chunks) {
       // Find Date
@@ -139,7 +173,7 @@ export default function ImportBox({ target = 'books' }) {
       let i = allTokens.length - 1;
       while (i >= 0) {
         // match numbers with optional commas and decimals
-        if (/^[\d,]+(\.\d+)?$/.test(allTokens[i]) || /^-\d+/.test(allTokens[i])) {
+        if (/^[?Rs\s]*[\d,]+(\.\d+)?$/.test(allTokens[i]) || /^-\d+/.test(allTokens[i])) {
           numbers.unshift(allTokens[i]);
           i--;
         } else {
@@ -204,7 +238,7 @@ export default function ImportBox({ target = 'books' }) {
     return false;
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (e: any) => {
     e.preventDefault();
     const text = e.clipboardData.getData('Text');
     if (!text) return;
@@ -214,10 +248,10 @@ export default function ImportBox({ target = 'books' }) {
     
     Papa.parse(text, {
       header: true, skipEmptyLines: true,
-      complete: (res) => {
+      complete: (res: any) => {
         const fields = res.meta.fields || [];
-        const mapping = autoGuessMapping(fields, target);
-        const missing = getTargetFields(target).filter(f => f.req).filter(f => !mapping[f.key]);
+        const mapping = autoGuessMapping(fields, target || '');
+        const missing = getTargetFields(target || '').filter((f: any) => f.req).filter((f: any) => !mapping[f.key]);
         
         // If standard header parsing fails (because there are no headers), try custom parsing
         if (missing.length > 0 || fields.length === 0) {
@@ -254,11 +288,11 @@ export default function ImportBox({ target = 'books' }) {
     setErrorMsg('');
     
     const { headers, rawRows } = pastedData;
-    const mapping = autoGuessMapping(headers, target);
+    const mapping = autoGuessMapping(headers, target || '');
     
-    const fields = getTargetFields(target);
-    const required = fields.filter(f => f.req);
-    const missing = required.filter(f => !mapping[f.key]);
+    const fields = getTargetFields(target || '');
+    const required = fields.filter((f: any) => f.req);
+    const missing = required.filter((f: any) => !mapping[f.key]);
     
     if (missing.length) {
       setErrorMsg('Missing columns: ' + missing.map(f => f.label).join(', ') + '. Did you forget to copy the header row from Excel?');
@@ -276,15 +310,39 @@ export default function ImportBox({ target = 'books' }) {
         month: importMonth, 
         quarter: importQuarter
       };
-    }).filter(r => r.invoiceNo);
+    }).filter(r => target === 'rcm' ? (r.lrNo || r.transporterName || r.entryDate || r.taxable || r.amount) : r.invoiceNo);
 
-    const storeKey = target === 'books' ? 'books' : target === 'rcm' ? 'rcm' : target === 'gstr1' ? 'gstr1' : target === 'gstr2b_gov' ? 'gstr2b_gov' : 'gstr2b';
+    const storeKey = target === 'books' ? 'books' : target === 'rcm' ? 'rcm' : target === 'gstr1' ? 'gstr1' : target === 'g2b_gov' ? 'gstr2b_gov' : 'gstr2b';
     
     let currentData = storeKey === 'books' ? books : storeKey === 'rcm' ? rcm : storeKey === 'gstr1' ? gstr1 : storeKey === 'gstr2b_gov' ? gstr2b_gov : gstr2b;
     let updatedData = replace ? newRows : [...currentData, ...newRows];
     
     if (target === 'gstr1') {
-      syncGstr1ToSheets(updatedData);
+      syncGstr1ToSheets(updatedData, "SYNC_ALL").catch(() => {
+         showToast("Background sync failed. Please refresh and try again.", "error");
+      });
+    } else if (target === 'rcm') {
+      if(syncRcmToSheets) {
+        syncRcmToSheets(updatedData, "SYNC_ALL").catch(() => {
+          showToast("Background sync failed. Please refresh and try again.", "error");
+        });
+      }
+    } else if (target === 'books') {
+      syncBooksToSheets(updatedData, "SYNC_ALL").catch(() => {
+         showToast("Background sync failed. Please refresh and try again.", "error");
+      });
+    } else if (target === 'g2b_gov') {
+      if (typeof syncGstr2bGovToSheets === 'function') {
+        syncGstr2bGovToSheets(updatedData, "SYNC_ALL").catch(() => {
+          showToast("Background sync failed. Please refresh and try again.", "error");
+        });
+      }
+      let currentG2b = gstr2b || [];
+      if (replace) {
+        currentG2b = currentG2b.filter((r: any) => !(r.companyId === activeCompanyId && r.fy === importFy && r.month === importMonth));
+      }
+      const updatedG2b = [...currentG2b, ...newRows.map((r: any) => Object.assign({}, r, { id: String(Math.random()) }))];
+      updateState({ gstr2b: updatedG2b });
     }
     
     updateState({ [storeKey]: updatedData, month: importMonth, financialYear: importFy });
@@ -382,8 +440,8 @@ export default function ImportBox({ target = 'books' }) {
                   opacity: 0.8,
                   transition: '0.2s'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.opacity = 1}
-                onMouseOut={(e) => e.currentTarget.style.opacity = 0.8}
+                  onMouseOver={(e: any) => e.currentTarget.style.opacity = '1'}
+                  onMouseOut={(e: any) => e.currentTarget.style.opacity = '0.8'}
               >
                 <X size={22} />
               </button>
@@ -402,7 +460,7 @@ export default function ImportBox({ target = 'books' }) {
                   style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
                 >
                   <option value="">Select FY</option>
-                  {FY_LIST && FY_LIST.map(f => <option key={f} value={f}>{f}</option>)}
+                  {FY_LIST && FY_LIST.map((f: any) => <option key={f} value={f}>{f}</option>)}
                 </select>
 
                 <select 
@@ -424,7 +482,7 @@ export default function ImportBox({ target = 'books' }) {
                   style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
                 >
                   <option value="">Select Month</option>
-                  {MONTHS && MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                  {MONTHS && MONTHS.map((m: any) => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
 
@@ -568,3 +626,12 @@ export default function ImportBox({ target = 'books' }) {
     </>
   );
 }
+
+
+
+
+
+
+
+
+

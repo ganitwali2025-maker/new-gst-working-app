@@ -20,10 +20,10 @@ const NAV = [
   { id: 'old-itc', path: '/old-itc', label: 'Old ITC', icon: Book },
   { id: 'itc-not-claimed', path: '/itc-not-claimed', label: 'ITC Not Claimed', icon: Book },
   { isHeading: true, label: 'GSTR-2B' },
-  { id: 'gstr2b', path: '/gstr2b', label: '2B All Months', icon: FileText },
-  { id: 'gstr2b-gov', path: '/gstr2b-gov', label: '2B GOV', icon: FileText },
+  { id: 'gstr2b', path: '/gstr2b', label: 'GSTR-2B All Months', icon: FileText },
+  { id: 'gstr2b-gov', path: '/gstr2b-gov', label: 'GSTR-2B Current Month', icon: FileText },
   { isHeading: true, label: 'GST & TAX' },
-  { id: 'rcmdata', path: '/rcmdata', label: 'RCM', icon: Landmark },
+  { id: 'rcmdata', path: '/rcmdata', label: 'RCM Invoices', icon: Landmark },
   { id: 'books-itc', path: '/books-itc', label: 'Books ITC', icon: Landmark },
   { id: 'gstr1', path: '/gstr1', label: 'GST R-1', icon: Landmark },
 

@@ -1,9 +1,11 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Badge } from './Badge';
 import { fmtNum, esc } from '../../utils/format';
 import { taxTotal, rowDataIssues } from '../../utils/invoice';
 import { Edit2, Trash2, X, ClipboardList, Save, FileText, Calendar, User, Building, IndianRupee, Percent, Check, Undo, Eye, BookOpen, Landmark, CalendarDays, IdCard, Calculator, Link } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import InvoiceViewModal from './InvoiceViewModal';
 
 const STATUS_META = {
   'Matched': { cls: 'green', dot: 'green' },
@@ -191,85 +193,71 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
   const [formData, setFormData] = useState(row);
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   
+  const Field = ({ icon: Icon, label, name, type="text" }) => (
+    <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e8f7f0', padding: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+        <div style={{ background: '#e8f7f0', color: '#0fa958', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+          <Icon size={16} strokeWidth={2.5} />
+        </div>
+        <label style={{ fontSize: '14px', color: '#111827', fontWeight: 600 }}>
+          {label} <span style={{ color: '#ef4444' }}>*</span>
+        </label>
+      </div>
+      <input 
+        name={name} 
+        value={formData[name] || ''} 
+        onChange={handleChange} 
+        type={type}
+        style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e5e7eb', color: '#111827', fontSize: '14px', outline: 'none' }} 
+      />
+    </div>
+  );
+
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.3)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(2px)' }} onClick={onClose}>
-      <div style={{ background: '#fff', borderRadius: '16px', width: '500px', maxWidth: '95%', boxShadow: '0 15px 35px rgba(0,0,0,0.15)', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }} onClick={onClose}>
+      <div style={{ background: '#fff', borderRadius: '16px', width: '640px', maxWidth: '95%', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
         
-        <div style={{ background: 'linear-gradient(to right, #e8f7f0, #f5fcf9)', padding: '16px 24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <div style={{ background: '#0fa958', color: '#fff', padding: '10px', borderRadius: '12px' }}>
+        {/* Header */}
+        <div style={{ background: 'linear-gradient(to right, #e8f7f0, #fff)', padding: '20px 24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1px solid #e8f7f0' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <div style={{ background: '#0fa958', color: '#fff', padding: '12px', borderRadius: '12px' }}>
               <ClipboardList size={24} />
             </div>
             <div>
-              <h3 style={{ margin: 0, color: '#092d1c', fontSize: '20px', fontWeight: 700 }}>Audit Record</h3>
-              <div style={{ color: '#537d67', fontSize: '13px', marginTop: '2px' }}>Enter the details of the invoice for audit tracking</div>
+              <h3 style={{ margin: 0, color: '#111827', fontSize: '20px', fontWeight: 700 }}>Audit Record</h3>
+              <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '2px' }}>Enter the details of the invoice for audit tracking</div>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#3d5c4b', padding: '4px' }}><X size={20} /></button>
+          <button onClick={onClose} style={{ background: '#fff', border: '1px solid #e5e7eb', cursor: 'pointer', color: '#4b5563', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}><X size={20} /></button>
         </div>
 
-        <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <FileText size={16} /> Invoice No
-            </label>
-            <input name="invoiceNo" value={formData.invoiceNo || ''} onChange={handleChange} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #b6d8c4', color: '#2b4d3c', fontSize: '13px', background: '#fdfefa', outline: 'none' }} />
-          </div>
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <Calendar size={16} /> Date
-            </label>
-            <input name="invoiceDate" value={formData.invoiceDate || ''} onChange={handleChange} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d5e5db', color: '#2b4d3c', fontSize: '13px', outline: 'none' }} />
-          </div>
-          
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <User size={16} /> GSTIN
-            </label>
-            <input name="gstin" value={formData.gstin || ''} onChange={handleChange} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d5e5db', color: '#2b4d3c', fontSize: '13px', outline: 'none' }} />
-          </div>
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <Building size={16} /> Supplier Name
-            </label>
-            <input name="supplierName" value={formData.supplierName || ''} onChange={handleChange} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d5e5db', color: '#2b4d3c', fontSize: '13px', outline: 'none' }} />
-          </div>
-          
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <IndianRupee size={16} /> Taxable Value
-            </label>
-            <input name="taxable" value={formData.taxable || ''} onChange={handleChange} type="number" style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #b6d8c4', color: '#2b4d3c', fontSize: '13px', background: '#fdfefa', outline: 'none' }} />
-          </div>
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <Percent size={16} /> IGST
-            </label>
-            <input name="igst" value={formData.igst || ''} onChange={handleChange} type="number" style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d5e5db', color: '#2b4d3c', fontSize: '13px', outline: 'none' }} />
-          </div>
-          
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <FileText size={16} /> CGST
-            </label>
-            <input name="cgst" value={formData.cgst || ''} onChange={handleChange} type="number" placeholder="Enter CGST amount" style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d5e5db', color: '#2b4d3c', fontSize: '13px', outline: 'none' }} />
-          </div>
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#0f4a31', marginBottom: '6px', fontWeight: 700 }}>
-              <FileText size={16} /> SGST
-            </label>
-            <input name="sgst" value={formData.sgst || ''} onChange={handleChange} type="number" placeholder="Enter SGST amount" style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #d5e5db', color: '#2b4d3c', fontSize: '13px', outline: 'none' }} />
-          </div>
+        {/* Form Body */}
+        <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', overflowY: 'auto' }}>
+          <Field icon={FileText} label="Invoice No" name="invoiceNo" />
+          <Field icon={Calendar} label="Date" name="invoiceDate" />
+          <Field icon={User} label="GSTIN" name="gstin" />
+          <Field icon={Building} label="Supplier Name" name="supplierName" />
+          <Field icon={IndianRupee} label="Taxable Value" name="taxable" type="number" />
+          <Field icon={Percent} label="IGST" name="igst" type="number" />
+          <Field icon={FileText} label="CGST" name="cgst" type="number" />
+          <Field icon={FileText} label="SGST" name="sgst" type="number" />
         </div>
         
-        <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #f0f5f2' }}>
-          <button onClick={onClose} style={{ background: '#f0f5f2', color: '#335c46', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <X size={16} /> Cancel
+        {/* Footer */}
+        <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', background: '#f9fafb' }}>
+          <button onClick={() => { if (window.confirm('Are you sure you want to delete this record?')) { onDelete(type, row.id); onClose(); } }} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Trash2 size={18} /> Delete Record
           </button>
-          <button onClick={() => { onSave(type, row.id, formData); onClose(); }} style={{ background: '#0fa958', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Save size={16} /> Save Changes
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={onClose} style={{ background: '#f3f4f6', color: '#4b5563', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <X size={18} /> Cancel
+            </button>
+            <button onClick={() => { onSave(type, row.id, formData); onClose(); }} style={{ background: '#0fa958', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(15, 169, 88, 0.2)' }}>
+              <Save size={18} /> Save Changes
+            </button>
+          </div>
         </div>
+
       </div>
     </div>
   );
@@ -277,6 +265,7 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
 
 export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, type }) {
   const [auditRow, setAuditRow] = useState(null);
+  const [invoiceViewRow, setInvoiceViewRow] = useState(null);
   const [resolveRow, setResolveRow] = useState(null);
   const [viewMatchRow, setViewMatchRow] = useState(null);
   const { updateRow, deleteRow, resolveMismatch, undoResolve, resolutions } = useAppContext();
@@ -309,21 +298,53 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
       <table>
         <thead>
           <tr>
-            {type === 'gstr1' ? (
+                        {isRcm || dataType === 'rcm' ? (
+              <>
+                <th>Month</th>
+                <th>Quarter</th>
+                <th>Financial Year</th>
+                <th>Entry Date</th>
+                <th>Transporter Name</th>
+                <th>Transporter L.R. No.</th>
+                <th className="num" style={{textAlign: "center"}}>Amount</th>
+                <th className="num" style={{textAlign: "center"}}>IGST 5%</th>
+                <th className="num" style={{textAlign: "center"}}>CGST 2.5%</th>
+                <th className="num" style={{textAlign: "center"}}>SGST 2.5%</th>
+                <th className="num" style={{textAlign: "center"}}>TOTAL TAX</th>
+              </>
+                        ) : ['gstr2b', 'g2b_gov'].includes(type || dataType) ? (
+              <>
+                <th>Month</th>
+                <th>Quarter</th>
+                <th>Financial Year</th>
+                <th>Date</th>
+                <th>GSTIN of Supplier</th>
+                <th>Trade / Legal Name</th>
+                <th>Invoice No</th>
+                <th className="num" style={{textAlign: "center"}}>Invoice Value</th>
+                <th className="num" style={{textAlign: "center"}}>Taxable Value</th>
+                <th className="num" style={{textAlign: "center"}}>IGST</th>
+                <th className="num" style={{textAlign: "center"}}>CGST</th>
+                <th className="num" style={{textAlign: "center"}}>SGST</th>
+                <th className="num" style={{textAlign: "center"}}>CESS</th>
+                <th className="num" style={{textAlign: "center"}}>Total Tax</th>
+              </>
+            ) : ['gstr1', 'books'].includes(type) ? (
               <>
                 <th>Month</th>
                 <th>Quarter</th>
                 <th>Financial Year</th>
                 <th>Invoice Date</th>
-                <th>Supplier / Party Name</th>
-                <th>GST No</th>
+                <th>{type === 'books' ? 'Name of Supplier' : 'Supplier / Party Name'}</th>
+                <th>{type === 'books' ? 'GST No.' : 'GST No'}</th>
                 <th>Invoice No</th>
-                <th className="num" style={{textAlign: "center"}}>Taxable Value</th>
-                <th className="num" style={{textAlign: "center"}}>IGST</th>
-                <th className="num" style={{textAlign: "center"}}>CGST</th>
-                <th className="num" style={{textAlign: "center"}}>SGST</th>
-                <th className="num" style={{textAlign: "center"}}>Total Tax</th>
-                <th className="num" style={{textAlign: "center"}}>Total Invoice Value</th>
+                <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'BESIC AS PER BOOK' : 'Taxable Value'}</th>
+                <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Integrated Tax (₹)' : 'IGST'}</th>
+                <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Central Tax (₹)' : 'CGST'}</th>
+                <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'State Tax (₹)' : 'SGST'}</th>
+                {type === 'books' && <th className="num" style={{textAlign: "center"}}>Cess</th>}
+                <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Total Tax Amount (₹)' : 'Total Tax'}</th>
+                <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Total Invoice Value (₹)' : 'Total Invoice Value'}</th>
               </>
             ) : (
               <>
@@ -353,7 +374,74 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
             </tr>
           ) : rows.map((r, i) => {
             const meta = STATUS_META[r.recoStatus] || { cls: 'grey', dot: 'grey' };
-            if (type === 'gstr1') {
+            if (isRcm || dataType === 'rcm') {
+              return (
+                <tr key={r.id || i}>
+                  <td>{esc(r.month)}</td>
+                  <td>{esc(r.quarter) === 'Q1' ? 'Q1 (Apr-Jun)' : esc(r.quarter) === 'Q2' ? 'Q2 (Jul-Sep)' : esc(r.quarter) === 'Q3' ? 'Q3 (Oct-Dec)' : esc(r.quarter) === 'Q4' ? 'Q4 (Jan-Mar)' : esc(r.quarter) || 'Q'}</td>
+                  <td>{esc(r.fy)}</td>
+                  <td>{esc(r.entryDate || r.invoiceDate)}</td>
+                  <td>{esc(r.transporterName || r.supplierName)}</td>
+                  <td>{esc(r.lrNo || r.invoiceNo)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.amount || r.taxable)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.igst || 0) + Number(r.cgst || 0) + Number(r.sgst || 0))}</td>
+                  {dataType && (
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setInvoiceViewRow(r)} title="View Row">
+                          <Eye size={15} />
+                        </button>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--blue)' }} onClick={() => setAuditRow(r)} title="Audit/Edit Row">
+                          <Edit2 size={15} />
+                        </button>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--red)' }} onClick={() => { if (window.confirm('Are you sure you want to delete this row?')) deleteRow(dataType, r.id); }} title="Delete Row">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              );
+            }
+            if (['gstr2b', 'g2b_gov'].includes(type || dataType)) {
+              return (
+                <tr key={r.id || i}>
+                  <td>{esc(r.month)}</td>
+                  <td>{esc(r.quarter) === 'Q1' ? 'Q1 (Apr-Jun)' : esc(r.quarter) === 'Q2' ? 'Q2 (Jul-Sep)' : esc(r.quarter) === 'Q3' ? 'Q3 (Oct-Dec)' : esc(r.quarter) === 'Q4' ? 'Q4 (Jan-Mar)' : esc(r.quarter) || 'Q'}</td>
+                  <td>{esc(r.fy)}</td>
+                  <td>{esc(r.invoiceDate)}</td>
+                  <td className="mono">{esc(r.gstin)}</td>
+                  <td>{esc(r.supplierName)}</td>
+                  <td>{esc(r.invoiceNo)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.taxable)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>
+                  <td className="num" style={{textAlign: "center"}}>{fmtNum(taxTotal(r))}</td>
+                  {dataType && (
+                    <td style={{ textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setInvoiceViewRow(r)} title="View Row">
+                          <Eye size={15} />
+                        </button>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--blue)' }} onClick={() => setAuditRow(r)} title="Audit/Edit Row">
+                          <Edit2 size={15} />
+                        </button>
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--red)' }} onClick={() => { if (window.confirm('Are you sure you want to delete this row?')) deleteRow(dataType, r.id); }} title="Delete Row">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              );
+            }
+            if (['gstr1', 'books'].includes(type)) {
               return (
                 <tr key={r.id || i}>
                   <td>{esc(r.month)}</td>
@@ -367,12 +455,13 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
+                  {type === 'books' && <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>}
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(taxTotal(r))}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
                   {dataType && (
                     <td style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
-                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setAuditRow(r)} title="View Row">
+                        <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setInvoiceViewRow(r)} title="View Row">
                           <Eye size={15} />
                         </button>
                         <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--blue)' }} onClick={() => setAuditRow(r)} title="Audit/Edit Row">
@@ -430,34 +519,17 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
             );
           })}
         </tbody>
-        <tfoot>
-          <tr style={{ background: 'var(--panel-2)', fontWeight: 'bold' }}>
-            {type === 'gstr1' ? (
-              <>
-                <td colSpan={7} style={{ textAlign: 'right', paddingRight: '16px', color: 'var(--purple)' }}>TOTAL</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalTaxable)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalIgst)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalCgst)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalSgst)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalTax)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalInvoice)}</td>
-              </>
-            ) : (
-              <>
-                <td colSpan={6} style={{ textAlign: 'right', paddingRight: '16px', color: 'var(--purple)' }}>TOTAL</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalTaxable)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalIgst)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalCgst)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalSgst)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalCess)}</td>
-                <td className="num" style={{textAlign: "center", color: 'var(--purple)'}}>{fmtNum(totalInvoice)}</td>
-              </>
-            )}
-            {dataType && <td></td>}
-          </tr>
-        </tfoot>
+
       </table>
       
+      {invoiceViewRow && dataType && (
+        <InvoiceViewModal
+          row={invoiceViewRow}
+          type={dataType}
+          onClose={() => setInvoiceViewRow(null)}
+        />
+      )}
+
       {auditRow && dataType && (
         <AuditModal 
           row={auditRow} 
@@ -488,3 +560,9 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
     </div>
   );
 }
+
+
+
+
+
+

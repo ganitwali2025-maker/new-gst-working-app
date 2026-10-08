@@ -1,0 +1,65 @@
+function doGet(e) {
+  var type = e.parameter.type;
+  var sheetName = (type === 'books') ? "BOOK ITC" : "GST-R1";
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({error: sheetName + " tab not found!"})).setMimeType(ContentService.MimeType.JSON);
+
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+
+  var headers = data[0];
+  var result = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    result.push(obj);
+  }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var payload = JSON.parse(e.postData.contents);
+  var type = payload.type; 
+  var sheetName = (type === 'books') ? "BOOK ITC" : "GST-R1";
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({ success: false, error: sheetName + " tab not found!" })).setMimeType(ContentService.MimeType.JSON);
+  
+  if (payload.action === "SYNC_ALL") {
+    var rows = payload.data;
+    
+    var lastRow = Math.max(sheet.getLastRow(), 1);
+    if (lastRow > 1) sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    
+    var headers = (type === 'books') 
+      ? ["Month", "Quarter", "Financial Year", "Name of Supplier", "GST No.", "Invoice No", "Invoice Date", "BESIC AS PER BOOK", "Integrated Tax (₹)", "Central Tax (₹)", "State Tax (₹)", "Cess", "Total Tax Amount (₹)", "Total Invoice Value (₹)"]
+      : ["Month", "Quarter", "Financial Year", "Invoice Date", "Supplier / Party Name", "GST No", "Invoice No", "Taxable Value", "IGST", "CGST", "SGST", "Total Tax", "Total Invoice Value"];
+    
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    
+    if (rows && rows.length > 0) {
+      var output = [];
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        if (type === 'books') {
+          output.push([
+            r.month || "", r.quarter || "", r.fy || "", r.supplierName || "", r.gstin || "", r.invoiceNo || "", r.invoiceDate || "", r.taxable || 0, r.igst || 0, r.cgst || 0, r.sgst || 0, r.cess || 0,
+            (Number(r.igst||0) + Number(r.cgst||0) + Number(r.sgst||0) + Number(r.cess||0)), (Number(r.taxable||0) + Number(r.igst||0) + Number(r.cgst||0) + Number(r.sgst||0) + Number(r.cess||0))
+          ]);
+        } else {
+          output.push([
+            r.month || "", r.quarter || "", r.fy || "", r.invoiceDate || "", r.supplierName || "", r.gstin || "", r.invoiceNo || "", r.taxable || 0, r.igst || 0, r.cgst || 0, r.sgst || 0, r.totalTax || 0, r.totalInvoiceValue || 0
+          ]);
+        }
+      }
+      sheet.getRange(2, 1, output.length, headers.length).setValues(output);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ success: true, count: rows.length })).setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Invalid action" })).setMimeType(ContentService.MimeType.JSON);
+}

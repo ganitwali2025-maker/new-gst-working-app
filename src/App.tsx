@@ -56,7 +56,7 @@ function MainLayout() {
             <Route path="/itc-not-claimed" element={<GenericTablePage title="ITC Not Claimed" type="books" hint="Unclaimed ITC rows" />} />
             
             <Route path="/gstr2b" element={<GSTR2B />} />
-            <Route path="/gstr2b-gov" element={<GenericTablePage title="2B GOV" type="g2b" hint="Government 2B data" />} />
+            <Route path="/gstr2b-gov" element={<GenericTablePage title="GSTR-2B Current Month" type="g2b_gov" hint="Government 2B data" />} />
             
             <Route path="/reconciliation" element={<Reconciliation />} />
             <Route path="/unmatch-gst" element={<GenericTablePage title="Unmatch GST" type="books" hint="Unmatched records" />} />

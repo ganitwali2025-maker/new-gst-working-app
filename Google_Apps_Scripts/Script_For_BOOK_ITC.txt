@@ -1,0 +1,96 @@
+// ==========================================
+// SCRIPT FOR BOOK ITC SHEET
+// ==========================================
+
+function onEdit(e) {
+  var sheet = e.source.getActiveSheet();
+  if (sheet.getName() !== "BOOK ITC") return;
+  
+  var range = e.range;
+  var row = range.getRow();
+  var col = range.getColumn();
+  
+  // Invoice Date is Column G (index 7)
+  if (row > 1 && col === 7) {
+    var dateVal = range.getValue();
+    
+    if (dateVal instanceof Date) {
+      var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var m = dateVal.getMonth();
+      var y = dateVal.getFullYear();
+      
+      var fy = "";
+      var q = "";
+      
+      if (m >= 3) {
+        fy = "FY " + y.toString().slice(-2) + "-" + (y+1).toString().slice(-2);
+        if (m <= 5) q = "Q1";
+        else if (m <= 8) q = "Q2";
+        else q = "Q3";
+      } else {
+        fy = "FY " + (y-1).toString().slice(-2) + "-" + y.toString().slice(-2);
+        q = "Q4";
+      }
+      
+      var monthStr = monthNames[m] + "-" + y.toString().slice(-2);
+      
+      sheet.getRange(row, 1).setValue(monthStr); // Col A
+      sheet.getRange(row, 2).setValue(q);        // Col B
+      sheet.getRange(row, 3).setValue(fy);       // Col C
+    } else if (!dateVal) {
+      sheet.getRange(row, 1, 1, 3).clearContent();
+    }
+  }
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("BOOK ITC");
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({error: "BOOK ITC tab not found!"})).setMimeType(ContentService.MimeType.JSON);
+
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+
+  var headers = data[0];
+  var result = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    result.push(obj);
+  }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("BOOK ITC");
+  var payload = JSON.parse(e.postData.contents);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({ success: false, error: "BOOK ITC tab not found!" })).setMimeType(ContentService.MimeType.JSON);
+  
+  if (payload.action === "SYNC_ALL") {
+    var rows = payload.data;
+    var lastRow = Math.max(sheet.getLastRow(), 1);
+    if (lastRow > 1) sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    
+    var headers = ["Month", "Quarter", "Financial Year", "Name of Supplier", "GST No.", "Invoice No", "Invoice Date", "BESIC AS PER BOOK", "Integrated Tax (?)", "Central Tax (?)", "State Tax (?)", "Cess", "Total Tax Amount (?)", "Total Invoice Value (?)"];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    
+    if (rows && rows.length > 0) {
+      var output = [];
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        output.push([
+          r.month || "", r.quarter || "", r.fy || "", r.supplierName || "", r.gstin || "", r.invoiceNo || "", r.invoiceDate || "",
+          r.taxable || 0, r.igst || 0, r.cgst || 0, r.sgst || 0, r.cess || 0,
+          (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0) + (Number(r.cess)||0),
+          (Number(r.taxable)||0) + (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0) + (Number(r.cess)||0)
+        ]);
+      }
+      sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ success: true, rowsInserted: rows.length })).setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Unknown action" })).setMimeType(ContentService.MimeType.JSON);
+}

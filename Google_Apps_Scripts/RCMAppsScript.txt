@@ -1,0 +1,125 @@
+function onEdit(e) {
+  var sheet = e.source.getActiveSheet();
+  if (sheet.getName() !== "RCM") return;
+  
+  var range = e.range;
+  var row = range.getRow();
+  var col = range.getColumn();
+  
+  // Update Month, Quarter, Financial Year automatically when "Entry Date" (Column D / 4) is edited
+  if (row > 1 && col === 4) {
+    var dateVal = range.getValue();
+    
+    if (dateVal instanceof Date) {
+      var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var m = dateVal.getMonth(); // 0-11
+      var y = dateVal.getFullYear();
+      
+      var fy = "";
+      var q = "";
+      
+      if (m >= 3) {
+        fy = "FY " + y.toString().slice(-2) + "-" + (y+1).toString().slice(-2);
+        if (m <= 5) q = "Q1";
+        else if (m <= 8) q = "Q2";
+        else q = "Q3";
+      } else {
+        fy = "FY " + (y-1).toString().slice(-2) + "-" + y.toString().slice(-2);
+        q = "Q4";
+      }
+      
+      var monthStr = monthNames[m] + "-" + y.toString().slice(-2); // e.g. Apr-26
+      
+      sheet.getRange(row, 1).setValue(monthStr); // Column A: Month
+      sheet.getRange(row, 2).setValue(q);        // Column B: Quarter
+      sheet.getRange(row, 3).setValue(fy);       // Column C: Financial Year
+    } else if (!dateVal) {
+      sheet.getRange(row, 1, 1, 3).clearContent();
+    }
+  }
+}
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("RCM");
+  
+  if (!sheet) {
+    return ContentService.createTextOutput(JSON.stringify({error: "RCM tab not found!"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var data = sheet.getDataRange().getValues();
+  
+  if (data.length <= 1) {
+    return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Exact headers we map to the app
+  var headers = ["month", "quarter", "fy", "entryDate", "transporterName", "lrNo", "amount", "igst", "cgst", "sgst", "totalTax"];
+  var result = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    
+    // Auto-calculate Total Tax if missing
+    if (!obj.totalTax) {
+       obj.totalTax = (Number(obj.igst) || 0) + (Number(obj.cgst) || 0) + (Number(obj.sgst) || 0);
+    }
+    
+    result.push(obj);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("RCM");
+  var payload = JSON.parse(e.postData.contents);
+  
+  if (!sheet) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: "RCM tab not found!" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (payload.action === "SYNC_ALL") {
+    var rows = payload.data;
+    
+    // Clear existing data but keep headers
+    var lastRow = Math.max(sheet.getLastRow(), 1);
+    if (lastRow > 1) {
+      sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    }
+    
+    // Convert JSON back to array based on columns
+    var newValues = rows.map(function(r) {
+      return [
+        r.month || "",
+        r.quarter || "",
+        r.fy || "",
+        r.entryDate || "",
+        r.transporterName || "",
+        r.lrNo || "",
+        r.amount || r.taxable || 0,
+        r.igst || 0,
+        r.cgst || 0,
+        r.sgst || 0,
+        r.totalTax || 0
+      ];
+    });
+    
+    if (newValues.length > 0) {
+      sheet.getRange(2, 1, newValues.length, newValues[0].length).setValues(newValues);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ success: true, rowsInserted: newValues.length }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Unknown action" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}

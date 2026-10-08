@@ -79,8 +79,8 @@ export default function Dashboard() {
   return (
     <>
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
-        <KpiCard label="Total Books Taxable" val={fmtINR(totalPurchase)} sub={`${fmtNum(currentBooks.length)} books`} color="var(--accent)" />
-        <KpiCard label="Total 2B Taxable" val={fmtINR(totalG2bTaxable)} sub={`${fmtNum(currentGstr2b.length)} 2B lines`} color="var(--accent)" />
+        <KpiCard label="Total Books Taxable" val={fmtINR(totalPurchase)} sub={`${fmtNum(currentBooks.length)} books`} color="var(--purple)" />
+        <KpiCard label="Total 2B Taxable" val={fmtINR(totalG2bTaxable)} sub={`${fmtNum(currentGstr2b.length)} 2B lines`} color="var(--purple)" />
         <KpiCard label="Matched Invoices" val={fmtNum(matchedRows.length)} sub="Reconciled" color="var(--green)" />
         <KpiCard label="Unmatched Invoices" val={fmtNum(unmatchedRows.length)} sub="Need review" color="var(--red)" />
         <KpiCard label="Matched ITC" val={fmtINR(matchedITC)} sub="Reconciled Total" color="var(--green)" />

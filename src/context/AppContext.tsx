@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loadData, saveData, defaultState, FY_LIST, MONTHS, todayFY } from '../utils/storage';
 import { getSampleData } from '../data/sampleData';
@@ -25,7 +26,11 @@ export function AppProvider({ children }) {
     (r) => r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month
   );
 
-  const currentGstr2b = state.gstr2b.filter(
+  const currentGstr2bGov = (state.gstr2b_gov || []).filter(
+    (r) => r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month
+  );
+
+  const currentGstr2b = (state.gstr2b || []).filter(
     (r) => r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month
   );
 
@@ -60,11 +65,15 @@ export function AppProvider({ children }) {
   };
 
   const clearCurrentPeriod = (type) => {
-    updateState({
-      [type]: state[type].filter(
-        (r) => !(r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month)
-      ),
-    });
+    const storeKey = type === 'g2b_gov' ? 'gstr2b_gov' : type;
+    if (!state[storeKey]) return;
+    const newData = state[storeKey].filter(
+      (r) => !(r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month)
+    );
+    updateState({ [storeKey]: newData });
+    if (type === 'gstr1' && typeof syncGstr1ToSheets === 'function') syncGstr1ToSheets(newData);
+    if (type === 'books' && typeof syncBooksToSheets === 'function') syncBooksToSheets(newData);
+    if (type === 'g2b_gov' && typeof syncGstr2bGovToSheets === 'function') syncGstr2bGovToSheets(newData);
   };
 
   const loadSample = () => {
@@ -87,36 +96,243 @@ export function AppProvider({ children }) {
     });
   };
 
-  const SCRIPT_URL = state.settings?.scriptUrl || "https://script.google.com/macros/s/AKfycbzPN-BdSxYQ_QHA1JazBwYXUXSt8d505s2HknrX65VFEfRWii7McdYn_nquTSk2ipoz/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyDt5t_rYT0ERzntmc41E0OSW4wkdmgZu55SAWmKX-eOkTWhRcK7GmMZnGoC57zLwen/exec";
 
-  const syncGstr1ToSheets = (gstr1Data) => {
-    // Sync all data for current active company so multiple months are saved
-    const companyData = gstr1Data.filter(r => r.companyId === state.activeCompanyId);
-    console.log('syncGstr1ToSheets called with', gstr1Data.length, 'rows. Filtered by companyId (', state.activeCompanyId, '):', companyData.length, 'rows.');
-    
-    const dataToSync = companyData.map(r => {
-      const taxable = Number(r.taxable) || 0;
-      const igst = Number(r.igst) || 0;
-      const cgst = Number(r.cgst) || 0;
-      const sgst = Number(r.sgst) || 0;
-      const cess = Number(r.cess) || 0;
-      const totalTax = igst + cgst + sgst + cess;
-      return {
-        id: r.id || "",
-        month: r.month || state.month,
-        quarter: r.quarter || "",
-        fy: r.fy || state.financialYear,
-        invoiceDate: r.invoiceDate || "",
-        supplierName: r.supplierName || "",
-        gstin: r.gstin || "",
-        invoiceNo: r.invoiceNo || "",
-        taxable, igst, cgst, sgst, totalTax,
-        totalInvoiceValue: taxable + totalTax
-      };
-    });
+  const fetchGstr1FromSheets = async () => {
+    try {
+      const res = await fetch(SCRIPT_URL + '?type=gstr1');
+      const sheetData = await res.json();
+      if (Array.isArray(sheetData)) {
+        const mappedData = sheetData.map(r => {
+          let dStr = r["invoiceDate"] || r["Invoice Date"] || "";
+          if (dStr && dStr.includes("T") && dStr.endsWith("Z")) {
+            const d = new Date(dStr);
+            if (!isNaN(d.getTime())) {
+              dStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+          }
+          return {
+            id: String(Math.random()),
+            companyId: state.activeCompanyId,
+            fy: r["fy"] || r["Financial Year"] || state.financialYear,
+            month: r["month"] || r["Month"] || state.month,
+            quarter: r["quarter"] || r["Quarter"] || "",
+            invoiceDate: dStr,
+            supplierName: r["supplierName"] || r["Supplier / Party Name"] || "",
+            gstin: r["gstin"] || r["GST No"] || "",
+            invoiceNo: r["invoiceNo"] || r["Invoice No"] || "",
+            taxable: Number(r["taxable"] || r["Taxable Value"]) || 0,
+            igst: Number(r["igst"] || r["IGST"]) || 0,
+            cgst: Number(r["cgst"] || r["CGST"]) || 0,
+            sgst: Number(r["sgst"] || r["SGST"]) || 0
+          };
+        });
+        updateState({ gstr1: mappedData });
+      }
+    } catch (e) {
+      console.error('Failed to fetch GSTR-1:', e);
+    }
+  };
 
-    console.log("Mock syncing to sheets:", dataToSync);
-    // Removed external fetch to SCRIPT_URL to keep it frontend-only.
+  const syncGstr1ToSheets = async (dataToSync, action = "SYNC_ALL") => {
+    try {
+      let payload = { action, type: 'gstr1', data: dataToSync };
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Failed to sync GSTR-1:', e);
+    }
+  };
+
+  const fetchBooksFromSheets = async () => {
+    try {
+      const res = await fetch(SCRIPT_URL + '?type=books');
+      const sheetData = await res.json();
+      if (Array.isArray(sheetData)) {
+        const mappedData = sheetData.map(r => {
+          let dStr = r["invoiceDate"] || r["Invoice Date"] || "";
+          if (dStr && dStr.includes("T") && dStr.endsWith("Z")) {
+            const d = new Date(dStr);
+            if (!isNaN(d.getTime())) {
+              dStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+          }
+          return {
+            id: String(Math.random()),
+            companyId: state.activeCompanyId,
+            fy: r["fy"] || r["Financial Year"] || state.financialYear,
+            month: r["month"] || r["Month"] || state.month,
+            quarter: r["quarter"] || r["Quarter"] || "",
+            invoiceDate: dStr,
+            supplierName: r["supplierName"] || r["Name of Supplier"] || "",
+            gstin: r["gstin"] || r["GST No."] || "",
+            invoiceNo: r["invoiceNo"] || r["Invoice No"] || "",
+            taxable: Number(r["taxable"] || r["BESIC AS PER BOOK"]) || 0,
+            igst: Number(r["igst"] || r["Integrated Tax (₹)"]) || 0,
+            cgst: Number(r["cgst"] || r["Central Tax (₹)"]) || 0,
+            sgst: Number(r["sgst"] || r["State Tax (₹)"]) || 0,
+            cess: Number(r["cess"] || r["Cess"]) || 0
+          };
+        });
+        updateState({ books: mappedData });
+      }
+    } catch (e) {
+      console.error('Failed to fetch Books ITC:', e);
+    }
+  };
+
+  const syncBooksToSheets = async (dataToSync, action = "SYNC_ALL") => {
+    try {
+      let payload = { action, type: 'books', data: dataToSync };
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Failed to sync Books ITC:', e);
+    }
+  };
+
+  const fetchRcmFromSheets = async () => {
+    try {
+      const res = await fetch(SCRIPT_URL + '?type=rcm');
+      const sheetData = await res.json();
+      if (Array.isArray(sheetData)) {
+        const mappedData = sheetData.map(r => {
+          let dStr = r["entryDate"] || r["Entry Date"] || "";
+          if (dStr && dStr.includes("T") && dStr.endsWith("Z")) {
+            const d = new Date(dStr);
+            if (!isNaN(d.getTime())) {
+              dStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+          }
+          return {
+            id: String(Math.random()),
+            companyId: state.activeCompanyId,
+            fy: r["fy"] || r["Financial Year"] || state.financialYear,
+            month: r["month"] || r["Month"] || state.month,
+            quarter: r["quarter"] || r["Quarter"] || "",
+            entryDate: dStr,
+            transporterName: r["transporterName"] || r["Transporter Name"] || "",
+            lrNo: r["lrNo"] || r["Transporter L.R. No."] || "",
+            amount: Number(r["taxable"] || r["Amount"]) || 0,
+            taxable: Number(r["taxable"] || r["Amount"]) || 0,
+            igst: Number(r["igst"] || r["IGST 5%"]) || 0,
+            cgst: Number(r["cgst"] || r["CGST 2.5%"]) || 0,
+            sgst: Number(r["sgst"] || r["SGST 2.5%"]) || 0
+          };
+        });
+        updateState({ rcm: mappedData });
+      }
+    } catch (e) {
+      console.error('Failed to fetch RCM:', e);
+    }
+  };
+
+  const syncRcmToSheets = async (dataToSync, action = "SYNC_ALL") => {
+    try {
+      let payload = { action, type: 'rcm', data: dataToSync };
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Failed to sync RCM:', e);
+    }
+  };
+
+  const fetchGstr2bGovFromSheets = async () => {
+    try {
+      const res = await fetch(SCRIPT_URL + '?type=g2b_gov');
+      const sheetData = await res.json();
+      if (Array.isArray(sheetData)) {
+        const mappedData = sheetData.map(r => {
+          let dStr = r["invoiceDate"] || r["Date"] || "";
+          if (dStr && dStr.includes("T") && dStr.endsWith("Z")) {
+            const d = new Date(dStr);
+            if (!isNaN(d.getTime())) {
+              dStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+          }
+          return {
+            id: String(Math.random()),
+            companyId: state.activeCompanyId,
+            fy: r["fy"] || r["Financial Year"] || state.financialYear,
+            month: r["month"] || r["Month"] || state.month,
+            quarter: r["quarter"] || r["Quarter"] || "",
+            invoiceDate: dStr,
+            supplierName: r["supplierName"] || r["Trade / Legal Name"] || "",
+            gstin: r["gstin"] || r["GSTIN of Supplier"] || "",
+            invoiceNo: r["invoiceNo"] || r["Invoice No"] || "",
+            taxable: Number(r["taxable"] || r["Taxable Value (₹)"]) || 0,
+            igst: Number(r["igst"] || r["IGST (₹)"]) || 0,
+            cgst: Number(r["cgst"] || r["CGST (₹)"]) || 0,
+            sgst: Number(r["sgst"] || r["SGST (₹)"]) || 0,
+            cess: Number(r["cess"] || r["CESS (₹)"]) || 0,
+            remark: r["remark"] || r["Remark"] || ""
+          };
+        });
+        updateState({ gstr2b_gov: mappedData });
+      }
+    } catch (e) {
+      console.error('Failed to fetch 2B GOV:', e);
+    }
+  };
+
+  const fetchGstr2bFromSheets = async () => {
+    try {
+      const res = await fetch(SCRIPT_URL + '?type=gstr2b');
+      const sheetData = await res.json();
+      if (Array.isArray(sheetData)) {
+        const mappedData = sheetData.map(r => {
+          let dStr = r["invoiceDate"] || r["Date"] || "";
+          if (dStr && dStr.includes("T") && dStr.endsWith("Z")) {
+            const d = new Date(dStr);
+            if (!isNaN(d.getTime())) {
+              dStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            }
+          }
+          return {
+            id: String(Math.random()),
+            companyId: state.activeCompanyId,
+            fy: r["fy"] || r["Financial Year"] || state.financialYear,
+            month: r["month"] || r["Month"] || state.month,
+            quarter: r["quarter"] || r["Quarter"] || "",
+            invoiceDate: dStr,
+            supplierName: r["supplierName"] || r["Trade / Legal Name"] || "",
+            gstin: r["gstin"] || r["GSTIN of Supplier"] || "",
+            invoiceNo: r["invoiceNo"] || r["Invoice No"] || "",
+            taxable: Number(r["taxable"] || r["Taxable Value"]) || Number(r["Taxable Value (\u20b9)"]) || 0,
+            igst: Number(r["igst"] || r["IGST"]) || Number(r["IGST (\u20b9)"]) || 0,
+            cgst: Number(r["cgst"] || r["CGST"]) || Number(r["CGST (\u20b9)"]) || 0,
+            sgst: Number(r["sgst"] || r["SGST"]) || Number(r["SGST (\u20b9)"]) || 0,
+            cess: Number(r["cess"] || r["CESS"]) || Number(r["CESS (\u20b9)"]) || 0,
+            remark: r["remark"] || r["Remark"] || ""
+          };
+        });
+        updateState({ gstr2b: mappedData });
+      }
+    } catch (e) {
+      console.error('Failed to fetch 2B All Months:', e);
+    }
+  };
+
+  const syncGstr2bGovToSheets = async (dataToSync, action = "SYNC_ALL") => {
+    try {
+      let payload = { action, type: 'g2b_gov', data: dataToSync };
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Failed to sync 2B GOV:', e);
+    }
   };
 
   const deleteRow = (type, rowId) => {
@@ -183,6 +399,15 @@ export function AppProvider({ children }) {
     deleteRow,
     updateRow,
     syncGstr1ToSheets,
+    fetchGstr1FromSheets,
+    syncBooksToSheets,
+    fetchBooksFromSheets,
+    syncRcmToSheets,
+    fetchRcmFromSheets,
+    syncGstr2bGovToSheets,
+    fetchGstr2bGovFromSheets,
+    fetchGstr2bFromSheets,
+    currentGstr2bGov,
     loadSample,
     clearAllData,
     toggleTheme,

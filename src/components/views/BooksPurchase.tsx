@@ -63,7 +63,7 @@ export default function BooksPurchase() {
     <>
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: '16px' }}>
         <KpiCard small label="Books Invoices" val={fmtNum(currentBooks.length)} sub="Total imported" color="var(--blue)" onClick={() => setActiveFilter('All')} active={activeFilter === 'All'} />
-        <KpiCard small label="2B Invoices" val={fmtNum(currentGstr2b.length)} sub="Total imported" color="var(--purple)" onClick={() => setActiveFilter('All')} />
+        <KpiCard small label="2B Invoices" val={fmtNum(currentGstr2b.length)} sub="Total imported" color="var(--accent)" onClick={() => setActiveFilter('All')} />
         <KpiCard small label="Matched / Final" val={fmtNum(sum.counts['Matched'] || 0)} sub="Ready to file" color="var(--green)" onClick={() => setActiveFilter('Matched')} active={activeFilter === 'Matched'} />
         <KpiCard small label="Pending Review" val={fmtNum(reconRows.length - (sum.counts['Matched'] || 0))} sub="Mismatches to resolve" color="var(--yellow)" onClick={() => setActiveFilter('Pending Review')} active={activeFilter === 'Pending Review'} />
         <KpiCard small label="Not in 2B" val={fmtNum(sum.counts['Not in 2B'] || 0)} sub="Missing from portal" color="var(--red)" onClick={() => setActiveFilter('Not in 2B')} active={activeFilter === 'Not in 2B'} />
@@ -73,7 +73,7 @@ export default function BooksPurchase() {
         <KpiCard small label="Amount Mismatch" val={fmtNum(sum.counts['Amount Mismatch'] || 0)} sub="Differs by value" color="var(--yellow)" onClick={() => setActiveFilter('Amount Mismatch')} active={activeFilter === 'Amount Mismatch'} />
         <KpiCard small label="GST Mismatch" val={fmtNum(sum.counts['GST Mismatch'] || 0)} sub="Tax diff > tol" color="var(--yellow)" onClick={() => setActiveFilter('GST Mismatch')} active={activeFilter === 'GST Mismatch'} />
         <KpiCard small label="Not in Books" val={fmtNum(sum.counts['Not in Books'] || 0)} sub="Missing from books" color="var(--blue)" onClick={() => setActiveFilter('Not in Books')} active={activeFilter === 'Not in Books'} />
-        <KpiCard small label="Duplicate" val={fmtNum(sum.counts['Duplicate Invoice'] || 0)} sub="Found multiples" color="var(--purple)" onClick={() => setActiveFilter('Duplicate Invoice')} active={activeFilter === 'Duplicate Invoice'} />
+        <KpiCard small label="Duplicate" val={fmtNum(sum.counts['Duplicate Invoice'] || 0)} sub="Found multiples" color="var(--accent)" onClick={() => setActiveFilter('Duplicate Invoice')} active={activeFilter === 'Duplicate Invoice'} />
         <KpiCard small label="Other Mismatches" val={fmtNum((sum.counts['Date Mismatch']||0) + (sum.counts['Taxable Value Mismatch']||0) + (sum.counts['IGST Mismatch']||0) + (sum.counts['CGST Mismatch']||0) + (sum.counts['SGST Mismatch']||0) + (sum.counts['Cess Mismatch']||0) + (sum.counts['Multiple Match / Possible Match']||0))} sub="Tax/Date/Partial" color="var(--yellow)" onClick={() => setActiveFilter('Other Mismatches')} active={activeFilter === 'Other Mismatches'} />
       </div>
 

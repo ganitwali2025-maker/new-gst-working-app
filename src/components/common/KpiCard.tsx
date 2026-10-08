@@ -21,13 +21,7 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
     else Icon = Activity;
   }
 
-  const l = (label || '').toLowerCase();
-  let hex = '#7C3AED'; // Default purple
-  if (l.includes('taxable')) hex = '#7C3AED';
-  else if (l.includes('igst')) hex = '#2563EB';
-  else if (l.includes('cgst')) hex = '#059669';
-  else if (l.includes('sgst')) hex = '#F59E0B';
-  else if (l === 'total gst' || l === 'gst') hex = '#9333EA';
+  let hex = '#7C3AED';
 
   const badgeSize = small ? '34px' : '44px';
   const iconSize = small ? 16 : 22;
@@ -51,14 +45,7 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
         padding: '16px'
       }}
     >
-      {/* Background soft wavy shape */}
-      <svg 
-        style={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.1, zIndex: 0, width: '120px', height: '100px', pointerEvents: 'none' }}
-        viewBox="0 0 100 100" preserveAspectRatio="none"
-      >
-        <path d="M0,100 C30,70 60,90 100,50 L100,100 Z" fill={hex} />
-        <path d="M0,100 C40,80 70,100 100,40 L100,100 Z" fill={hex} opacity="0.5" />
-      </svg>
+
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
         <div style={{
@@ -89,3 +76,4 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
     </div>
   );
 }
+

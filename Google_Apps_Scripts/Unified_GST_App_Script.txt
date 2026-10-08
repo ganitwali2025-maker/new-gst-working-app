@@ -1,0 +1,145 @@
+function onEdit(e) {
+  var sheet = e.source.getActiveSheet();
+  var sheetName = sheet.getName();
+  
+  if (["BOOK ITC", "GST-R1", "RCM", "2B GOV"].indexOf(sheetName) === -1) return;
+  
+  var range = e.range;
+  var row = range.getRow();
+  var col = range.getColumn();
+  
+  var targetCol = (sheetName === "BOOK ITC") ? 7 : 4;
+  
+  if (row > 1 && col === targetCol) {
+    var dateVal = range.getValue();
+    if (dateVal instanceof Date) {
+      var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var m = dateVal.getMonth();
+      var y = dateVal.getFullYear();
+      var fy = "";
+      var q = "";
+      if (m >= 3) {
+        fy = "FY " + y.toString().slice(-2) + "-" + (y+1).toString().slice(-2);
+        if (m <= 5) q = "Q1";
+        else if (m <= 8) q = "Q2";
+        else q = "Q3";
+      } else {
+        fy = "FY " + (y-1).toString().slice(-2) + "-" + y.toString().slice(-2);
+        q = "Q4";
+      }
+      var monthStr = monthNames[m] + "-" + y.toString().slice(-2);
+      sheet.getRange(row, 1).setValue(monthStr);
+      sheet.getRange(row, 2).setValue(q);
+      sheet.getRange(row, 3).setValue(fy);
+    } else if (!dateVal) {
+      sheet.getRange(row, 1, 1, 3).clearContent();
+    }
+  }
+}
+
+function doGet(e) {
+  var type = e.parameter.type;
+  var sheetName = "";
+  if (type === 'books') sheetName = "BOOK ITC";
+  else if (type === 'gstr1') sheetName = "GST-R1";
+  else if (type === 'rcm') sheetName = "RCM";
+  else if (type === 'g2b_gov') sheetName = "2B GOV";
+  else return ContentService.createTextOutput(JSON.stringify({error: "Invalid type"})).setMimeType(ContentService.MimeType.JSON);
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({error: sheetName + " tab not found!"})).setMimeType(ContentService.MimeType.JSON);
+
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+
+  var headers = data[0]; 
+  if (type === 'rcm') {
+    headers = ["month", "quarter", "fy", "entryDate", "transporterName", "lrNo", "taxable", "igst", "cgst", "sgst", "totalTax"];
+  } else if (type === 'g2b_gov') {
+    headers = ["month", "quarter", "fy", "invoiceDate", "gstin", "supplierName", "invoiceNo", "invoiceValue", "taxable", "igst", "cgst", "sgst", "cess", "totalTax", "remark"];
+  }
+  
+  var result = [];
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    if (type === 'rcm' && !obj.totalTax) {
+       obj.totalTax = (Number(obj.igst) || 0) + (Number(obj.cgst) || 0) + (Number(obj.sgst) || 0);
+    }
+    result.push(obj);
+  }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var payload = JSON.parse(e.postData.contents);
+  var type = payload.type; 
+  var sheetName = "";
+  if (type === 'books') sheetName = "BOOK ITC";
+  else if (type === 'gstr1') sheetName = "GST-R1";
+  else if (type === 'rcm') sheetName = "RCM";
+  else if (type === 'g2b_gov') sheetName = "2B GOV";
+  else return ContentService.createTextOutput(JSON.stringify({error: "Invalid type"})).setMimeType(ContentService.MimeType.JSON);
+  
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({ success: false, error: sheetName + " tab not found!" })).setMimeType(ContentService.MimeType.JSON);
+  
+  if (payload.action === "SYNC_ALL") {
+    var rows = payload.data;
+    var lastRow = Math.max(sheet.getLastRow(), 1);
+    if (lastRow > 1) sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).clearContent();
+    
+    var headers = [];
+    if (type === 'books') {
+      headers = ["Month", "Quarter", "Financial Year", "Name of Supplier", "GST No.", "Invoice No", "Invoice Date", "BESIC AS PER BOOK", "Integrated Tax (?)", "Central Tax (?)", "State Tax (?)", "Cess", "Total Tax Amount (?)", "Total Invoice Value (?)"];
+    } else if (type === 'gstr1') {
+      headers = ["Month", "Quarter", "Financial Year", "Invoice Date", "Supplier / Party Name", "GST No", "Invoice No", "Taxable Value", "IGST", "CGST", "SGST", "Total Tax", "Total Invoice Value"];
+    } else if (type === 'rcm') {
+      headers = ["Month", "Quarter", "Financial Year", "Entry Date", "Transporter Name", "Transporter L.R. No.", "Amount", "IGST 5%", "CGST 2.5%", "SGST 2.5%", "TOTAL TAX"];
+    } else if (type === 'g2b_gov') {
+      headers = ["Month", "Quarter", "Financial Year", "Date", "GSTIN of Supplier", "Trade / Legal Name", "Invoice No", "Invoice Value (?)", "Taxable Value (?)", "IGST (?)", "CGST (?)", "SGST (?)", "CESS (?)", "Total Tax (?)", "Remark"];
+    }
+    
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    
+    if (rows && rows.length > 0) {
+      var output = [];
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        if (type === 'books') {
+          output.push([
+            r.month || "", r.quarter || "", r.fy || "", r.supplierName || "", r.gstin || "", r.invoiceNo || "", r.invoiceDate || "",
+            r.taxable || 0, r.igst || 0, r.cgst || 0, r.sgst || 0, r.cess || 0,
+            (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0) + (Number(r.cess)||0),
+            (Number(r.taxable)||0) + (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0) + (Number(r.cess)||0)
+          ]);
+        } else if (type === 'gstr1') {
+          output.push([
+            r.month || "", r.quarter || "", r.fy || "", r.invoiceDate || "", r.supplierName || "", r.gstin || "", r.invoiceNo || "",
+            r.taxable || 0, r.igst || 0, r.cgst || 0, r.sgst || 0,
+            (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0),
+            (Number(r.taxable)||0) + (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0)
+          ]);
+        } else if (type === 'rcm') {
+          output.push([
+            r.month || "", r.quarter || "", r.fy || "", r.entryDate || "", r.transporterName || "", r.lrNo || "",
+            r.taxable || r.amount || 0, r.igst || 0, r.cgst || 0, r.sgst || 0,
+            (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0)
+          ]);
+        } else if (type === 'g2b_gov') {
+          var taxTot = (Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0) + (Number(r.cess)||0);
+          output.push([
+            r.month || "", r.quarter || "", r.fy || "", r.invoiceDate || "", r.gstin || "", r.supplierName || "", r.invoiceNo || "",
+            r.invoiceValue || (Number(r.taxable || 0) + taxTot), r.taxable || 0, r.igst || 0, r.cgst || 0, r.sgst || 0, r.cess || 0, taxTot, r.remark || ""
+          ]);
+        }
+      }
+      sheet.getRange(2, 1, output.length, output[0].length).setValues(output);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ success: true, rowsInserted: rows.length })).setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(JSON.stringify({ success: false, error: "Unknown action" })).setMimeType(ContentService.MimeType.JSON);
+}
