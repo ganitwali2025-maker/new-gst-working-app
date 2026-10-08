@@ -1,7 +1,18 @@
 import React from 'react';
-import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity, IndianRupee, Globe2, Landmark, MapPin, Receipt, Calculator, Banknote, BarChart2 } from 'lucide-react';
+import { ShoppingCart, FileText, FileDown, CheckCircle, AlertCircle, FileX, FileMinus, Copy, Activity, IndianRupee, Globe2, Landmark, MapPin, Receipt, Calculator, Banknote, BarChart2, LucideIcon } from 'lucide-react';
 
-export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon: CustomIcon, small, onClick, active }) {
+interface KpiCardProps {
+  label: string;
+  val: string | number;
+  sub?: string;
+  color?: string;
+  icon?: LucideIcon;
+  small?: boolean;
+  onClick?: () => void;
+  active?: boolean;
+}
+
+export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon: CustomIcon, small, onClick, active }: KpiCardProps) {
   let Icon = CustomIcon;
   if (!Icon) {
     const l = (label || '').toLowerCase();
@@ -21,57 +32,51 @@ export default function KpiCard({ label, val, sub, color = 'var(--accent)', icon
     else Icon = Activity;
   }
 
-  let hex = '#7C3AED';
-
-  const badgeSize = small ? '34px' : '44px';
-  const iconSize = small ? 16 : 22;
+  // Theme constants
+  const hex = 'var(--accent)';
+  // Use a very soft, barely visible background instead of a bright color
+  const lightHex = 'rgba(124, 58, 237, 0.05)';
 
   return (
     <div 
-      className={`kpi ${small ? 'small' : ''} ${active ? 'active' : ''} ${onClick ? 'clickable' : ''}`}
+      className={`kpi ${active ? 'active' : ''} ${onClick ? 'clickable' : ''}`}
       onClick={onClick}
       style={{
         cursor: onClick ? 'pointer' : 'default',
         background: '#ffffff',
-        border: `1px solid ${hex}40`,
-        borderRadius: '12px',
-        transform: active ? 'scale(1.02)' : undefined,
-        boxShadow: active ? `0 8px 24px ${hex}30` : `0 2px 8px ${hex}15`,
-        transition: 'all 0.2s ease',
-        position: 'relative',
-        overflow: 'hidden',
+        border: active ? `1px solid ${hex}` : '1px solid #E2E8F0',
+        borderRadius: '8px',
+        boxShadow: active ? `0 0 0 1px ${hex}20` : '0 1px 2px rgba(0, 0, 0, 0.05)',
+        transition: 'all 0.15s ease',
         display: 'flex',
         flexDirection: 'column',
-        padding: '16px'
+        padding: '16px',
+        height: '100%',
+        minHeight: '120px',
       }}
     >
-
-
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: badgeSize, height: badgeSize, borderRadius: '50%',
-          background: hex,
-          color: '#ffffff',
-          boxShadow: `0 4px 10px ${hex}40`
+          width: '32px', height: '32px', borderRadius: '50%',
+          background: lightHex,
+          color: hex
         }}>
-          <Icon size={iconSize} strokeWidth={2.5} />
+          <Icon size={16} strokeWidth={2} />
         </div>
         
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: '28px', height: '28px', borderRadius: '8px',
-          background: `${hex}15`,
-          color: hex
+          color: '#94A3B8'
         }}>
-          <BarChart2 size={16} />
+          <BarChart2 size={16} strokeWidth={2} />
         </div>
       </div>
 
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div className="lbl" style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '13px', marginBottom: '4px' }}>{label}</div>
-        <div className="val" style={{ color: hex, fontWeight: 700, fontSize: '22px', letterSpacing: '-0.02em', marginBottom: '4px' }}>{val}</div>
-        <div className="delta" style={{ color: 'var(--muted)', fontWeight: 500, fontSize: '12px' }}>{sub}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, justifyContent: 'flex-end' }}>
+        <div style={{ fontWeight: 500, color: '#334155', fontSize: '13px', lineHeight: '1.2' }}>{label}</div>
+        <div style={{ color: '#3B0764', fontWeight: 600, fontSize: '20px', lineHeight: '1.2' }}>{val}</div>
+        <div style={{ color: '#64748B', fontWeight: 400, fontSize: '12px', lineHeight: '1.2' }}>{sub}</div>
       </div>
     </div>
   );

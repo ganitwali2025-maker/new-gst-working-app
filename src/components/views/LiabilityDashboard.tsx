@@ -250,13 +250,13 @@ export default function Liability() {
                   const pct = Math.min(100, (s.igst / maxInterIgst) * 100);
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: c, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flex: 'none' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: c, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 500, flex: 'none' }}>
                         {i + 1}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
                           <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.pos}</span>
-                          <span style={{ fontWeight: 700, fontFamily: 'inherit' }}>{fmtINR(s.igst)}</span>
+                          <span style={{ fontWeight: 500, fontFamily: 'inherit' }}>{fmtINR(s.igst)}</span>
                         </div>
                         <div style={{ height: '4px', background: 'var(--border-soft)', borderRadius: '2px', display: 'flex' }}>
                           <div style={{ width: `${pct}%`, background: c, borderRadius: '2px' }}></div>
@@ -294,7 +294,7 @@ export default function Liability() {
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', flex: 'none' }}>
-                      <div style={{ fontWeight: 700, fontSize: '14.5px', color: 'var(--fg)' }}>{fmtINR(s.taxable)}</div>
+                      <div style={{ fontWeight: 500, fontSize: '14.5px', color: 'var(--fg)' }}>{fmtINR(s.taxable)}</div>
                       <div style={{ fontSize: '11px', color: 'var(--muted)' }}>Sale Amt</div>
                     </div>
                   </div>

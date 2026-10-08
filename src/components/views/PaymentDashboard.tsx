@@ -97,7 +97,7 @@ export default function Payment() {
                   <td className="num">{fmt(100000)}</td>
                   <td className="num">{fmt(50000)}</td>
                   <td className="num">{fmt(50000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(200000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(200000)}</td>
                 </tr>
                 <tr>
                   <td style={{fontWeight: 600}}>B2C Large</td>
@@ -105,7 +105,7 @@ export default function Payment() {
                   <td className="num">{fmt(30000)}</td>
                   <td className="num">{fmt(0)}</td>
                   <td className="num">{fmt(0)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(30000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(30000)}</td>
                 </tr>
                 <tr>
                   <td style={{fontWeight: 600}}>B2C Others</td>
@@ -113,7 +113,7 @@ export default function Payment() {
                   <td className="num">{fmt(10000)}</td>
                   <td className="num">{fmt(25000)}</td>
                   <td className="num">{fmt(25000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(60000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(60000)}</td>
                 </tr>
                 <tr>
                   <td style={{fontWeight: 600}}>Export / Zero Rated</td>
@@ -121,7 +121,7 @@ export default function Payment() {
                   <td className="num">{fmt(10000)}</td>
                   <td className="num">{fmt(0)}</td>
                   <td className="num">{fmt(0)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(10000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(10000)}</td>
                 </tr>
                 <tr>
                   <td style={{fontWeight: 600}}>Credit / Debit Notes</td>
@@ -129,15 +129,15 @@ export default function Payment() {
                   <td className="num">{fmt(0)}</td>
                   <td className="num">{fmt(0)}</td>
                   <td className="num">{fmt(0)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(0)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(0)}</td>
                 </tr>
                 <tr style={{background: 'var(--panel-2)'}}>
-                  <td style={{fontWeight: 700}}>Total Liability</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(12500000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(150000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(75000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(75000)}</td>
-                  <td className="num" style={{fontWeight: 800, color: 'var(--blue)'}}>{fmt(300000)}</td>
+                  <td style={{fontWeight: 500}}>Total Liability</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(12500000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(150000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(75000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(75000)}</td>
+                  <td className="num" style={{fontWeight: 600, color: 'var(--blue)'}}>{fmt(300000)}</td>
                 </tr>
               </tbody>
             </table>
@@ -166,19 +166,19 @@ export default function Payment() {
                   <td>IGST</td>
                   <td className="num">{fmt(50000)}</td>
                   <td className="num">{fmt(1100000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(1150000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(1150000)}</td>
                 </tr>
                 <tr>
                   <td>CGST</td>
                   <td className="num">{fmt(100000)}</td>
                   <td className="num">{fmt(250000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(350000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(350000)}</td>
                 </tr>
                 <tr>
                   <td>SGST</td>
                   <td className="num">{fmt(100000)}</td>
                   <td className="num">{fmt(240000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(350000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(350000)}</td>
                 </tr>
                 <tr>
                   <td>&nbsp;</td>
@@ -193,10 +193,10 @@ export default function Payment() {
                   <td></td>
                 </tr>
                 <tr style={{background: '#f0fdf4'}}>
-                  <td style={{fontWeight: 700}}>Total ITC</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(250000)}</td>
-                  <td className="num" style={{fontWeight: 700}}>{fmt(1590000)}</td>
-                  <td className="num" style={{fontWeight: 800, color: 'var(--green)'}}>{fmt(1850000)}</td>
+                  <td style={{fontWeight: 500}}>Total ITC</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(250000)}</td>
+                  <td className="num" style={{fontWeight: 500}}>{fmt(1590000)}</td>
+                  <td className="num" style={{fontWeight: 600, color: 'var(--green)'}}>{fmt(1850000)}</td>
                 </tr>
               </tbody>
             </table>
@@ -231,7 +231,7 @@ export default function Payment() {
                 <td className="num" style={{background: '#f0fdf4', color: 'var(--green)', fontWeight: 600}}>{fmt(1150000)}</td>
                 <td className="num">{fmt(0)}</td>
                 <td className="num">{fmt(0)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(100000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(100000)}</td>
               </tr>
               <tr>
                 <td style={{fontWeight: 600}}>CGST</td>
@@ -239,7 +239,7 @@ export default function Payment() {
                 <td className="num">{fmt(0)}</td>
                 <td className="num" style={{background: '#f0fdf4', color: 'var(--green)', fontWeight: 600}}>{fmt(350000)}</td>
                 <td className="num" style={{background: 'var(--panel-2)', color: 'var(--muted)'}}>{fmt(0)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(150000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(150000)}</td>
               </tr>
               <tr>
                 <td style={{fontWeight: 600}}>SGST</td>
@@ -247,15 +247,15 @@ export default function Payment() {
                 <td className="num">{fmt(0)}</td>
                 <td className="num" style={{background: 'var(--panel-2)', color: 'var(--muted)'}}>{fmt(0)}</td>
                 <td className="num" style={{background: '#f0fdf4', color: 'var(--green)', fontWeight: 600}}>{fmt(350000)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(150000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(150000)}</td>
               </tr>
               <tr style={{background: 'var(--panel-2)'}}>
-                <td style={{fontWeight: 700}}>Total</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(2250000)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(1150000)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(350000)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(350000)}</td>
-                <td className="num" style={{fontWeight: 800, color: 'var(--red)'}}>{fmt(400000)}</td>
+                <td style={{fontWeight: 500}}>Total</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(2250000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(1150000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(350000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(350000)}</td>
+                <td className="num" style={{fontWeight: 600, color: 'var(--red)'}}>{fmt(400000)}</td>
               </tr>
             </tbody>
           </table>
@@ -310,14 +310,14 @@ export default function Payment() {
                 <td className="num">{fmt(5000)}</td>
                 <td className="num" style={{color: 'var(--red)', fontWeight: 600}}>{fmt(145000)}</td>
               </tr>
-              <tr style={{ background: '#fef2f2' }}>
-                <td style={{fontWeight: 700, color: 'var(--red)'}}>TOTAL CHALLAN</td>
-                <td className="num" style={{fontWeight: 700, color: 'var(--red)'}}>{fmt(400000)}</td>
-                <td className="num" style={{fontWeight: 700, color: 'var(--red)'}}>{fmt(0)}</td>
-                <td className="num" style={{fontWeight: 700, color: 'var(--red)'}}>{fmt(0)}</td>
-                <td className="num" style={{fontWeight: 700, color: 'var(--red)'}}>{fmt(400000)}</td>
-                <td className="num" style={{fontWeight: 700, color: 'var(--red)'}}>{fmt(15000)}</td>
-                <td className="num" style={{fontWeight: 800, color: 'var(--red)', fontSize: '15px'}}>{fmt(385000)}</td>
+              <tr style={{ background: 'var(--panel)' }}>
+                <td style={{fontWeight: 500, color: 'var(--red)'}}>TOTAL CHALLAN</td>
+                <td className="num" style={{fontWeight: 500, color: 'var(--red)'}}>{fmt(400000)}</td>
+                <td className="num" style={{fontWeight: 500, color: 'var(--red)'}}>{fmt(0)}</td>
+                <td className="num" style={{fontWeight: 500, color: 'var(--red)'}}>{fmt(0)}</td>
+                <td className="num" style={{fontWeight: 500, color: 'var(--red)'}}>{fmt(400000)}</td>
+                <td className="num" style={{fontWeight: 500, color: 'var(--red)'}}>{fmt(15000)}</td>
+                <td className="num" style={{fontWeight: 600, color: 'var(--red)', fontSize: '15px'}}>{fmt(385000)}</td>
               </tr>
             </tbody>
           </table>
@@ -352,7 +352,7 @@ export default function Payment() {
                 <td className="num">{fmt(45000)}</td>
                 <td className="num">{fmt(0)}</td>
                 <td className="num">{fmt(0)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(45000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(45000)}</td>
                 <td><span style={{background: '#ffedd5', color: '#ea580c', fontSize: '11px', padding: '2px 8px', borderRadius: '12px', fontWeight: 600}}>Pending</span></td>
               </tr>
               <tr>
@@ -361,8 +361,8 @@ export default function Payment() {
                 <td className="num">{fmt(32400)}</td>
                 <td className="num">{fmt(16200)}</td>
                 <td className="num">{fmt(16200)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(64800)}</td>
-                <td><span style={{background: '#dcfce7', color: '#166534', fontSize: '11px', padding: '2px 8px', borderRadius: '12px', fontWeight: 600}}>Paid</span></td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(64800)}</td>
+                <td><span style={{background: 'var(--green-soft)', color: '#166534', fontSize: '11px', padding: '2px 8px', borderRadius: '12px', fontWeight: 600}}>Paid</span></td>
               </tr>
               <tr>
                 <td style={{fontWeight: 600}}>Import of Goods</td>
@@ -370,16 +370,16 @@ export default function Payment() {
                 <td className="num">{fmt(21600)}</td>
                 <td className="num">{fmt(0)}</td>
                 <td className="num">{fmt(0)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(21600)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(21600)}</td>
                 <td><span style={{background: '#ffedd5', color: '#ea580c', fontSize: '11px', padding: '2px 8px', borderRadius: '12px', fontWeight: 600}}>Pending</span></td>
               </tr>
               <tr style={{background: 'var(--panel-2)'}}>
-                <td style={{fontWeight: 700}}>Total RCM</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(550000)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(99000)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(16200)}</td>
-                <td className="num" style={{fontWeight: 700}}>{fmt(16200)}</td>
-                <td className="num" style={{fontWeight: 800}}>{fmt(131400)}</td>
+                <td style={{fontWeight: 500}}>Total RCM</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(550000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(99000)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(16200)}</td>
+                <td className="num" style={{fontWeight: 500}}>{fmt(16200)}</td>
+                <td className="num" style={{fontWeight: 600}}>{fmt(131400)}</td>
                 <td></td>
               </tr>
             </tbody>

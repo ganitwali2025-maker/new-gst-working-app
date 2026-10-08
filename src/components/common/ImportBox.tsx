@@ -366,8 +366,9 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
 
   return (
     <>
-      <button className="btn" style={{ background: "linear-gradient(90deg, #3B82F6, #2563EB)", color: "#fff", border: "none", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }} onClick={() => setIsOpen(true)}>
-        <Upload size={14} /> Import
+      <button className="btn-action btn-import" onClick={() => setIsOpen(true)}>
+        <span className="icon-wrapper"><Upload size={16} /></span>
+        <span>Import</span>
       </button>
 
       {isOpen && (
@@ -390,20 +391,16 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
           }}>
             {/* Header */}
             <div style={{
-              background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
-              padding: '24px',
+              background: 'var(--bg)',
+              padding: '20px 24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              color: 'white',
+              color: 'var(--text)',
+              borderBottom: '1px solid var(--border)',
               position: 'relative',
               overflow: 'hidden'
             }}>
-              {/* Decorative shapes for header background */}
-              <div style={{ position: 'absolute', top: '-10px', left: '-30px', width: '220px', height: '220px', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }}></div>
-              <div style={{ position: 'absolute', bottom: '-40px', right: '10%', width: '300px', height: '250px', background: 'radial-gradient(ellipse, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 60%)', borderRadius: '50%', transform: 'rotate(-20deg)' }}></div>
-              <div style={{ position: 'absolute', top: '0', right: '0', width: '100%', height: '100%', backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 1000 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath fill=\'rgba(255,255,255,0.05)\' d=\'M0,50 C300,150 400,-50 1000,100 L1000,0 L0,0 Z\'/%3E%3Cpath fill=\'rgba(0,0,0,0.05)\' d=\'M0,200 C400,100 600,250 1000,150 L1000,200 L0,200 Z\'/%3E%3C/svg%3E")', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.8 }}></div>
-              
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
                 <div style={{
                   background: 'white',
@@ -413,7 +410,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#7C3AED',
+                  color: 'var(--accent)',
                   boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                 }}>
                   <Clipboard size={24} />
@@ -428,7 +425,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: 'white',
+                  color: 'var(--muted)',
                   cursor: 'pointer',
                   padding: '8px',
                   borderRadius: '50%',
@@ -437,13 +434,12 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                   justifyContent: 'center',
                   position: 'relative',
                   zIndex: 1,
-                  opacity: 0.8,
                   transition: '0.2s'
                 }}
-                  onMouseOver={(e: any) => e.currentTarget.style.opacity = '1'}
-                  onMouseOut={(e: any) => e.currentTarget.style.opacity = '0.8'}
+                  onMouseOver={(e: any) => e.currentTarget.style.color = 'var(--text)'}
+                  onMouseOut={(e: any) => e.currentTarget.style.color = 'var(--muted)'}
               >
-                <X size={22} />
+                <X size={20} />
               </button>
             </div>
 
@@ -457,7 +453,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                     setImportFy(e.target.value);
                     updateState({ financialYear: e.target.value });
                   }}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px', outline: 'none', color: 'var(--text)', cursor: 'pointer' }}
                 >
                   <option value="">Select FY</option>
                   {FY_LIST && FY_LIST.map((f: any) => <option key={f} value={f}>{f}</option>)}
@@ -465,7 +461,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
 
                 <select 
                   value={importQuarter} onChange={e => setImportQuarter(e.target.value)}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px', outline: 'none', color: 'var(--text)', cursor: 'pointer' }}
                 >
                   <option value="">Select Quarter</option>
                   <option value="Q1">Q1 (Apr-Jun)</option>
@@ -479,7 +475,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                     setImportMonth(e.target.value);
                     updateState({ month: e.target.value });
                   }}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', color: '#374151', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px', outline: 'none', color: 'var(--text)', cursor: 'pointer' }}
                 >
                   <option value="">Select Month</option>
                   {MONTHS && MONTHS.map((m: any) => <option key={m} value={m}>{m}</option>)}
@@ -488,7 +484,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
 
               {errorMsg && (
                 <div style={{
-                  backgroundColor: '#FEE2E2',
+                  backgroundColor: 'var(--red-soft)',
                   border: '1px solid #F87171',
                   color: '#B91C1C',
                   padding: '12px 16px',
@@ -505,7 +501,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
 
               {/* Textarea Container */}
               <div style={{
-                border: '1px solid #A78BFA',
+                border: '1px solid var(--accent)',
                 borderRadius: '8px',
                 position: 'relative',
                 overflow: 'hidden'
@@ -517,8 +513,8 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                   pointerEvents: 'none',
                   opacity: pasteText ? 0 : 1
                 }}>
-                  <div style={{ color: '#4C1D95', fontSize: '15px', fontWeight: '500', marginBottom: '4px' }}>Click here and press Ctrl+V</div>
-                  <div style={{ color: '#8B5CF6', fontSize: '13px' }}>Paste Excel data from your clipboard</div>
+                  <div style={{ color: 'var(--accent)', fontSize: '15px', fontWeight: '500', marginBottom: '4px' }}>Click here and press Ctrl+V</div>
+                  <div style={{ color: 'var(--accent)', fontSize: '13px' }}>Paste Excel data from your clipboard</div>
                 </div>
                 
                 <div style={{
@@ -527,7 +523,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                   top: '50%',
                   transform: 'translateY(-50%)',
                   pointerEvents: 'none',
-                  color: pastedData.rawRows.length > 0 ? '#10B981' : '#A78BFA',
+                  color: pastedData.rawRows.length > 0 ? 'var(--green)' : 'var(--accent)',
                   fontSize: '14px',
                   fontWeight: '500'
                 }}>
@@ -544,7 +540,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                     minHeight: '100px',
                     backgroundColor: 'transparent',
                     fontSize: '13px',
-                    color: '#4B5563',
+                    color: 'var(--text)',
                     outline: 'none',
                     fontFamily: 'monospace'
                   }}
@@ -565,13 +561,13 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
             {/* Footer */}
             <div style={{
               padding: '16px 24px',
-              borderTop: '1px solid #E5E7EB',
+              borderTop: '1px solid var(--border)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: '#F9FAFB'
+              backgroundColor: 'var(--panel-2)'
             }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#4B5563', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text)', cursor: 'pointer' }}>
                 <input 
                   type="checkbox" 
                   checked={replace} 
@@ -586,9 +582,9 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                   style={{
                     padding: '8px 20px',
                     borderRadius: '6px',
-                    border: '1px solid #D1D5DB',
+                    border: '1px solid var(--border)',
                     backgroundColor: 'white',
-                    color: '#374151',
+                    color: 'var(--text)',
                     fontWeight: '500',
                     fontSize: '14px',
                     cursor: 'pointer'
@@ -602,10 +598,10 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                     padding: '8px 20px',
                     borderRadius: '6px',
                     border: 'none',
-                    backgroundColor: '#7C3AED',
+                    backgroundColor: 'var(--accent)',
                     color: 'white',
                     fontWeight: '500',
-                    fontSize: '14px',
+                    fontSize: '13px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',

@@ -49,24 +49,24 @@ export default function InvoiceViewModal({ row, type, onClose }: { row: any, typ
         {/* Header */}
         <div style={{
           padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          borderBottom: '1px solid #eee', background: 'linear-gradient(to right, #f5f3ff, #fff)'
+          borderBottom: '1px solid var(--border)', background: 'var(--panel)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ background: '#7C3AED', color: '#fff', padding: '8px', borderRadius: '8px' }}>
+            <div style={{ background: 'var(--accent-soft)', color: 'var(--accent)', padding: '8px', borderRadius: '8px' }}>
               <FileText size={24} />
             </div>
             <div>
-              <h2 style={{ margin: 0, fontSize: '20px', color: '#1e1b4b', fontWeight: 700 }}>Invoice View</h2>
-              <p style={{ margin: 0, fontSize: '13px', color: '#6b7280' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', color: 'var(--text)', fontWeight: 600 }}>Invoice View</h2>
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
                 {isGstr1 ? 'GSTR-1 Sales Register' : 'Books ITC Purchase Register'}
               </p>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="btn ghost" style={{ color: '#7C3AED', border: '1px solid #ddd', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }} onClick={() => window.print()}>
+            <button className="btn ghost" style={{ color: 'var(--accent)', border: '1px solid #ddd', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }} onClick={() => window.print()}>
               <Printer size={16} /> Print
             </button>
-            <button className="btn ghost" style={{ color: '#7C3AED', border: '1px solid #ddd', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button className="btn ghost" style={{ color: 'var(--accent)', border: '1px solid #ddd', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Download size={16} /> Download
             </button>
             <button className="btn ghost" style={{ padding: '8px', color: '#1e1b4b' }} onClick={onClose}>
@@ -80,78 +80,78 @@ export default function InvoiceViewModal({ row, type, onClose }: { row: any, typ
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
             <div>
-              <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', color: '#6D28D9', fontWeight: 800 }}>{seller.name}</h1>
-              <p style={{ margin: 0, color: '#6b7280', fontSize: '13px', lineHeight: '1.5' }}>
+              <h1 style={{ margin: '0 0 4px 0', fontSize: '24px', color: 'var(--accent)', fontWeight: 600 }}>{seller.name}</h1>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '13px', lineHeight: '1.5' }}>
                 {seller.address}
               </p>
             </div>
-            <div style={{ background: '#f5f3ff', padding: '12px 20px', borderRadius: '8px', textAlign: 'center' }}>
-              <h3 style={{ margin: '0 0 2px 0', color: '#6D28D9', fontSize: '16px', fontWeight: 800 }}>TAX INVOICE</h3>
-              <p style={{ margin: 0, color: '#4b5563', fontSize: '11px' }}>Original for Recipient</p>
+            <div style={{ background: 'var(--panel-2)', padding: '12px 20px', borderRadius: '8px', textAlign: 'center' }}>
+              <h3 style={{ margin: '0 0 2px 0', color: 'var(--accent)', fontSize: '16px', fontWeight: 600 }}>TAX INVOICE</h3>
+              <p style={{ margin: 0, color: 'var(--text)', fontSize: '11px' }}>Original for Recipient</p>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#faf5ff', borderRadius: '8px', border: '1px solid #f3e8ff' }}>
-              <div style={{ color: '#9333ea' }}><Building2 size={20} /></div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--panel-2)', borderRadius: '8px', border: '1px solid var(--accent-soft)' }}>
+              <div style={{ color: 'var(--accent)' }}><Building2 size={20} /></div>
               <div>
-                <p style={{ margin: 0, fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>GSTIN</p>
-                <p style={{ margin: '2px 0 0 0', fontSize: '14px', color: '#111827', fontWeight: 700 }}>{seller.gstin}</p>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>GSTIN</p>
+                <p style={{ margin: '2px 0 0 0', fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{seller.gstin}</p>
               </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#faf5ff', borderRadius: '8px', border: '1px solid #f3e8ff' }}>
-              <div style={{ color: '#9333ea' }}><FileText size={20} /></div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--panel-2)', borderRadius: '8px', border: '1px solid var(--accent-soft)' }}>
+              <div style={{ color: 'var(--accent)' }}><FileText size={20} /></div>
               <div>
-                <p style={{ margin: 0, fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>Invoice No</p>
-                <p style={{ margin: '2px 0 0 0', fontSize: '14px', color: '#111827', fontWeight: 700 }}>{row.invoiceNo || 'N/A'}</p>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>Invoice No</p>
+                <p style={{ margin: '2px 0 0 0', fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{row.invoiceNo || 'N/A'}</p>
               </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#faf5ff', borderRadius: '8px', border: '1px solid #f3e8ff' }}>
-              <div style={{ color: '#9333ea' }}><Calendar size={20} /></div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--panel-2)', borderRadius: '8px', border: '1px solid var(--accent-soft)' }}>
+              <div style={{ color: 'var(--accent)' }}><Calendar size={20} /></div>
               <div>
-                <p style={{ margin: 0, fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>Invoice Date</p>
-                <p style={{ margin: '2px 0 0 0', fontSize: '14px', color: '#111827', fontWeight: 700 }}>{row.invoiceDate || 'N/A'}</p>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>Invoice Date</p>
+                <p style={{ margin: '2px 0 0 0', fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{row.invoiceDate || 'N/A'}</p>
               </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
             <div style={{ width: '100%' }}>
-              <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid #eee' }}>
-                  <span style={{ fontSize: '14px', color: '#4b5563', fontWeight: 500 }}>Taxable Value</span>
-                  <span style={{ fontSize: '14px', color: '#111827', fontWeight: 700 }}>{fmtINR(taxable)}</span>
+              <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>Taxable Value</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{fmtINR(taxable)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid #eee' }}>
-                  <span style={{ fontSize: '14px', color: '#4b5563', fontWeight: 500 }}>IGST</span>
-                  <span style={{ fontSize: '14px', color: '#111827', fontWeight: 700 }}>{fmtINR(igst)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>IGST</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{fmtINR(igst)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid #eee' }}>
-                  <span style={{ fontSize: '14px', color: '#4b5563', fontWeight: 500 }}>CGST</span>
-                  <span style={{ fontSize: '14px', color: '#111827', fontWeight: 700 }}>{fmtINR(cgst)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>CGST</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{fmtINR(cgst)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid #eee' }}>
-                  <span style={{ fontSize: '14px', color: '#4b5563', fontWeight: 500 }}>SGST</span>
-                  <span style={{ fontSize: '14px', color: '#111827', fontWeight: 700 }}>{fmtINR(sgst)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>SGST</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 500 }}>{fmtINR(sgst)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: '#faf5ff', borderBottom: '1px solid #eee' }}>
-                  <span style={{ fontSize: '15px', color: '#6D28D9', fontWeight: 600 }}>Total Tax</span>
-                  <span style={{ fontSize: '15px', color: '#6D28D9', fontWeight: 800 }}>{fmtINR(totalTax)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--panel-2)', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '15px', color: 'var(--accent)', fontWeight: 600 }}>Total Tax</span>
+                  <span style={{ fontSize: '15px', color: 'var(--accent)', fontWeight: 600 }}>{fmtINR(totalTax)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', background: '#f3e8ff' }}>
-                  <span style={{ fontSize: '16px', color: '#6D28D9', fontWeight: 700 }}>Total Invoice Value</span>
-                  <span style={{ fontSize: '18px', color: '#6D28D9', fontWeight: 800 }}>{fmtINR(totalInvoice)}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--accent-soft)' }}>
+                  <span style={{ fontSize: '16px', color: 'var(--accent)', fontWeight: 500 }}>Total Invoice Value</span>
+                  <span style={{ fontSize: '18px', color: 'var(--accent)', fontWeight: 600 }}>{fmtINR(totalInvoice)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div>
-              <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: '#111827', fontWeight: 700 }}>Amount in Words</p>
-              <p style={{ margin: 0, fontSize: '14px', color: '#4b5563' }}>{numberToWords(totalInvoice)}</p>
+              <p style={{ margin: '0 0 4px 0', fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>Amount in Words</p>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--text)' }}>{numberToWords(totalInvoice)}</p>
             </div>
-            <button className="btn" style={{ padding: '10px 24px', background: '#fff', border: '1px solid #ccc', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }} onClick={onClose}>
+            <button className="btn" style={{ padding: '10px 24px', background: '#fff', border: '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }} onClick={onClose}>
               Close
             </button>
           </div>

@@ -4,10 +4,19 @@ import {
   LayoutDashboard, Scale, Book, FileText, Landmark,
   ArrowRightLeft, FileBarChart, Upload, Building2, Settings, Banknote,
   ChevronDown, ChevronRight, ChevronLeft
-, BarChart3, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext';
+, BarChart3, PanelLeftClose, PanelLeftOpen, LucideIcon } from 'lucide-react';
 
-const NAV = [
+type NavItem = {
+  id?: string;
+  path?: string;
+  label: string;
+  icon?: LucideIcon;
+  isHeading?: boolean;
+  isGroup?: boolean;
+  children?: { id: string; path: string; label: string }[];
+};
+
+const NAV: NavItem[] = [
   { id: 'dashboard', path: '/dashboard', label: 'ITC Dashboard', icon: LayoutDashboard },
   { id: 'liability', path: '/liability', label: 'Liability Dashboard', icon: Scale },
   { id: 'payment', path: '/payment', label: 'Payment Dashboard', icon: Banknote },
@@ -33,9 +42,8 @@ const NAV = [
   { id: 'settings', path: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export default function Sidebar({ isOpen, toggleSidebar }) {
-  const { activeCompany, financialYear, month } = useAppContext();
-  const [openGroups, setOpenGroups] = useState({ 
+export default function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSidebar: () => void }) {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ 
     'books-reco': true, 
     'gstr2b-group': true, 
     'reco-group': true, 
@@ -43,7 +51,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     'reports-group': false 
   });
 
-  const toggleGroup = (id) => {
+  const toggleGroup = (id: string) => {
     setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -58,14 +66,14 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           width: '24px', 
           height: '24px', 
           background: 'transparent', 
-          border: '1px solid rgba(255, 255, 255, 0.5)',
+          border: '1px solid var(--border)',
           borderRadius: '50%', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           cursor: 'pointer', 
           zIndex: 100, 
-          color: '#ffffff', 
+          color: 'var(--muted)', 
           boxShadow: 'none',
           transition: 'right 0.2s ease'
         }} 
@@ -85,23 +93,23 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           if (n.isHeading) {
             return <div key={'head-'+i} className="nav-group-label">{n.label}</div>;
           }
-          if (n.isGroup) {
+          if (n.isGroup && n.id) {
             const isOpen = openGroups[n.id];
             return (
               <div key={n.id} className="nav-group">
                 <div 
                   className="navlink group-toggle" 
-                  onClick={() => toggleGroup(n.id)}
+                  onClick={() => toggleGroup(n.id as string)}
                 >
                   <div className="navlink-inner">
-                    <n.icon size={16} />
+                    {n.icon && <n.icon size={16} />}
                     <span>{n.label}</span>
                   </div>
                   <div className="chevron">
                     {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </div>
                 </div>
-                {isOpen && (
+                {isOpen && n.children && (
                   <div className="nav-group-children" style={{ marginLeft: '19px', paddingLeft: '11px', borderLeft: '1px solid var(--border-soft)', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px', marginBottom: '4px' }}>
                     {n.children.map(child => (
                       <NavLink 
@@ -121,10 +129,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           return (
             <NavLink 
               key={n.id} 
-              to={n.path} 
+              to={n.path as string} 
               className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
             >
-              <n.icon size={16} />
+              {n.icon && <n.icon size={16} />}
               <span>{n.label}</span>
             </NavLink>
           );

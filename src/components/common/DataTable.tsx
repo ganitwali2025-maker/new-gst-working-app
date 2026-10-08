@@ -92,11 +92,11 @@ const MatchDetailsModal = ({ row, onClose }) => {
 
   return (
     <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }} onClick={onClose}>
-      <div style={{ background: '#f8fafc', width: '1200px', maxWidth: '95vw', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '95vh' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: 'var(--bg)', width: '1200px', maxWidth: '95vw', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '95vh' }} onClick={e => e.stopPropagation()}>
         
         <div style={{ background: '#fff', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ background: '#e8f7f0', color: 'var(--green)', padding: '10px', borderRadius: '50%' }}>
+            <div style={{ background: 'var(--panel)', color: 'var(--green)', padding: '10px', borderRadius: '50%' }}>
               <Link size={24} />
             </div>
             <div>
@@ -110,8 +110,8 @@ const MatchDetailsModal = ({ row, onClose }) => {
         <div style={{ padding: '24px', overflowY: 'auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '24px' }}>
             
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #a3e6cd', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-              <div style={{ background: '#e8f7f0', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #a3e6cd' }}>
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid var(--green)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+              <div style={{ background: 'var(--panel)', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--green)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--green)' }}>
                   <div style={{ background: 'var(--green)', color: '#fff', padding: '8px', borderRadius: '50%' }}><BookOpen size={20} /></div>
                   <h3 style={{ margin: 0, fontSize: '16px' }}>Books Entry</h3>
@@ -127,15 +127,15 @@ const MatchDetailsModal = ({ row, onClose }) => {
                   <DetailRow icon={Percent} label="IGST" value={fmtNum(reconData.booksIgst)} />
                   <DetailRow icon={Percent} label="CGST" value={fmtNum(reconData.booksCgst)} />
                   <DetailRow icon={Percent} label="SGST" value={fmtNum(reconData.booksSgst)} />
-                  <div style={{ background: '#f0f9f5' }}>
+                  <div style={{ background: 'var(--green-soft)' }}>
                     <DetailRow icon={Calculator} label="Total Tax" value={fmtNum(reconData.booksTax)} isTotal color="var(--green)" />
                   </div>
                 </div>
               ) : <div style={{ padding: '32px', textAlign: 'center', color: 'var(--muted)' }}>Not found in Books</div>}
             </div>
 
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #d8b4e2', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-              <div style={{ background: '#f3e8f7', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #d8b4e2' }}>
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid var(--accent)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+              <div style={{ background: 'var(--accent-soft)', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--accent)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--purple)' }}>
                   <div style={{ background: 'var(--purple)', color: '#fff', padding: '8px', borderRadius: '50%' }}><Landmark size={20} /></div>
                   <h3 style={{ margin: 0, fontSize: '16px' }}>Govt 2B (Current Month)</h3>
@@ -151,15 +151,15 @@ const MatchDetailsModal = ({ row, onClose }) => {
                   <DetailRow icon={Percent} label="IGST" value={fmtNum(reconData.g2bIgst)} isMismatch={checkMismatch(reconData.booksIgst, reconData.g2bIgst)} />
                   <DetailRow icon={Percent} label="CGST" value={fmtNum(reconData.g2bCgst)} isMismatch={checkMismatch(reconData.booksCgst, reconData.g2bCgst)} />
                   <DetailRow icon={Percent} label="SGST" value={fmtNum(reconData.g2bSgst)} isMismatch={checkMismatch(reconData.booksSgst, reconData.g2bSgst)} />
-                  <div style={{ background: '#f7f2f9' }}>
+                  <div style={{ background: 'var(--panel)' }}>
                     <DetailRow icon={Calculator} label="Total Tax" value={fmtNum(reconData.g2bTax)} isMismatch={checkMismatch(reconData.booksTax, reconData.g2bTax)} isTotal color="var(--purple)" />
                   </div>
                 </div>
               ) : <div style={{ padding: '32px', textAlign: 'center', color: 'var(--muted)' }}>Not found in 2B Current Month</div>}
             </div>
 
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #a3c2e6', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-              <div style={{ background: '#e8f0f7', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #a3c2e6' }}>
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid var(--blue)', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+              <div style={{ background: 'var(--blue-soft)', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--blue)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--blue)' }}>
                   <div style={{ background: 'var(--blue)', color: '#fff', padding: '8px', borderRadius: '50%' }}><CalendarDays size={20} /></div>
                   <h3 style={{ margin: 0, fontSize: '16px' }}>Govt 2B (All Months)</h3>
@@ -175,7 +175,7 @@ const MatchDetailsModal = ({ row, onClose }) => {
                   <DetailRow icon={Percent} label="IGST" value={fmtNum(reconData.g2bAllIgst)} isMismatch={checkMismatch(reconData.booksIgst, reconData.g2bAllIgst)} />
                   <DetailRow icon={Percent} label="CGST" value={fmtNum(reconData.g2bAllCgst)} isMismatch={checkMismatch(reconData.booksCgst, reconData.g2bAllCgst)} />
                   <DetailRow icon={Percent} label="SGST" value={fmtNum(reconData.g2bAllSgst)} isMismatch={checkMismatch(reconData.booksSgst, reconData.g2bAllSgst)} />
-                  <div style={{ background: '#f0f4f9' }}>
+                  <div style={{ background: 'var(--panel)' }}>
                     <DetailRow icon={Calculator} label="Total Tax" value={fmtNum(reconData.g2bAllTax)} isMismatch={checkMismatch(reconData.booksTax, reconData.g2bAllTax)} isTotal color="var(--blue)" />
                   </div>
                 </div>
@@ -194,12 +194,12 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   
   const Field = ({ icon: Icon, label, name, type="text" }) => (
-    <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e8f7f0', padding: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+    <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid var(--panel)', padding: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-        <div style={{ background: '#e8f7f0', color: '#0fa958', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+        <div style={{ background: 'var(--panel)', color: 'var(--green)', padding: '6px', borderRadius: '8px', display: 'flex' }}>
           <Icon size={16} strokeWidth={2.5} />
         </div>
-        <label style={{ fontSize: '14px', color: '#111827', fontWeight: 600 }}>
+        <label style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 600 }}>
           {label} <span style={{ color: '#ef4444' }}>*</span>
         </label>
       </div>
@@ -208,7 +208,7 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
         value={formData[name] || ''} 
         onChange={handleChange} 
         type={type}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e5e7eb', color: '#111827', fontSize: '14px', outline: 'none' }} 
+        style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', outline: 'none' }} 
       />
     </div>
   );
@@ -218,17 +218,17 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
       <div style={{ background: '#fff', borderRadius: '16px', width: '640px', maxWidth: '95%', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }} onClick={e => e.stopPropagation()}>
         
         {/* Header */}
-        <div style={{ background: 'linear-gradient(to right, #e8f7f0, #fff)', padding: '20px 24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1px solid #e8f7f0' }}>
+        <div style={{ background: 'linear-gradient(to right, var(--panel), #fff)', padding: '20px 24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1px solid var(--panel)' }}>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{ background: '#0fa958', color: '#fff', padding: '12px', borderRadius: '12px' }}>
+            <div style={{ background: 'var(--green)', color: '#fff', padding: '12px', borderRadius: '12px' }}>
               <ClipboardList size={24} />
             </div>
             <div>
-              <h3 style={{ margin: 0, color: '#111827', fontSize: '20px', fontWeight: 700 }}>Audit Record</h3>
-              <div style={{ color: '#6b7280', fontSize: '13px', marginTop: '2px' }}>Enter the details of the invoice for audit tracking</div>
+              <h3 style={{ margin: 0, color: 'var(--text)', fontSize: '20px', fontWeight: 500 }}>Audit Record</h3>
+              <div style={{ color: 'var(--muted)', fontSize: '13px', marginTop: '2px' }}>Enter the details of the invoice for audit tracking</div>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: '#fff', border: '1px solid #e5e7eb', cursor: 'pointer', color: '#4b5563', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}><X size={20} /></button>
+          <button onClick={onClose} style={{ background: '#fff', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text)', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}><X size={20} /></button>
         </div>
 
         {/* Form Body */}
@@ -244,15 +244,15 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
         </div>
         
         {/* Footer */}
-        <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e5e7eb', background: '#f9fafb' }}>
-          <button onClick={() => { if (window.confirm('Are you sure you want to delete this record?')) { onDelete(type, row.id); onClose(); } }} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', background: 'var(--panel-2)' }}>
+          <button onClick={() => { if (window.confirm('Are you sure you want to delete this record?')) { onDelete(type, row.id); onClose(); } }} style={{ background: 'var(--red-soft)', color: 'var(--red)', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Trash2 size={18} /> Delete Record
           </button>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={onClose} style={{ background: '#f3f4f6', color: '#4b5563', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button onClick={onClose} style={{ background: 'var(--panel-2)', color: 'var(--text)', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <X size={18} /> Cancel
             </button>
-            <button onClick={() => { onSave(type, row.id, formData); onClose(); }} style={{ background: '#0fa958', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(15, 169, 88, 0.2)' }}>
+            <button onClick={() => { onSave(type, row.id, formData); onClose(); }} style={{ background: 'var(--green)', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(15, 169, 88, 0.2)' }}>
               <Save size={18} /> Save Changes
             </button>
           </div>

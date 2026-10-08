@@ -37,69 +37,50 @@ export default function RcmData() {
   return (
     <>
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: '24px' }}>
-        <KpiCard small label="Total Taxable" val={fmtINR(total)} sub={"Sum for " + (month || "this period")} color="var(--purple)" />
+        <KpiCard small label="Total Taxable" val={fmtINR(total)} sub={"Sum for " + (month || "this period")} color="var(--accent)" />
         <KpiCard small label="Total IGST" val={fmtINR(totalIgst)} sub="Integrated GST" color="var(--blue)" />
         <KpiCard small label="Total CGST" val={fmtINR(totalCgst)} sub="Central GST" color="var(--green)" />
         <KpiCard small label="Total SGST" val={fmtINR(totalSgst)} sub="State GST" color="var(--yellow)" />
-        <KpiCard small label="Total Tax Payable" val={fmtINR(tax)} sub="Total RCM Tax" color="var(--purple)" />
+        <KpiCard small label="Total Tax Payable" val={fmtINR(tax)} sub="Total RCM Tax" color="var(--accent)" />
       </div>
       
       <div className="panel">
         <div className="panel-head">
-          <div>
-            <h3 style={{ color: 'var(--purple)', fontSize: '24px', fontWeight: 'bold' }}>RCM Invoices {isLocked && <Lock size={16} color="var(--accent)" style={{marginLeft: '8px'}}/>}</h3>
-            <div className="hint">{activeCompany?.name || 'No company selected'} | {month} FY{financialYear}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div className="sheet-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><line x1="9" y1="11" x2="15" y2="11"></line></svg>
+            </div>
+            <div>
+              <h3 className="sheet-title">RCM Invoices {isLocked && <Lock size={16} color="var(--accent)" style={{marginLeft: '8px'}}/>}</h3>
+              <div className="sheet-subtitle">{activeCompany?.name || 'No company selected'} | {month} FY{financialYear}</div>
+            </div>
           </div>
           <div className="flex gap8" style={{ flexWrap: 'wrap' }}>
-            <button 
-              className="btn"
-              style={{
-                background: isLocked ? 'linear-gradient(90deg, #F59E0B, #D97706)' : 'linear-gradient(90deg, #10B981, #059669)',
-                color: '#fff',
-                border: 'none',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-              onClick={() => toggleLock('rcm')}
-            >
-              {isLocked ? <><Lock size={14} /> Locked</> : <><Unlock size={14} /> Lock Sheet</>}
+            <button className="btn-action btn-lock" onClick={() => toggleLock('rcm')}>
+              <span className="icon-wrapper">
+                {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
+              </span>
+              <span>{isLocked ? 'Locked' : 'Lock Sheet'}</span>
             </button>
             
             {!isLocked && (
-              <button 
-                className="btn" 
-                style={{ 
-                  background: 'linear-gradient(90deg, #EF4444, #DC2626)', color: '#fff', border: 'none',
-                  color: '#fff',
-                  border: 'none',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }}
-                onClick={handleClear}
-              >
-                Clear Data
-              </button>
+              <button className="btn-action btn-clear" onClick={handleClear}>
+              <span className="icon-wrapper"><Trash2 size={16} /></span>
+              <span>Clear Data</span>
+            </button>
             )}
 
-            <button 
-              className="btn" 
-              style={{
-                background: 'linear-gradient(90deg, var(--purple), #6D28D9)', color: '#fff', border: 'none',
-                color: '#fff',
-                border: 'none',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                opacity: isSyncing ? 0.7 : 1
-              }} 
-              onClick={async () => {
-                setIsSyncing(true);
-                try {
-                  if (fetchRcmFromSheets) await fetchRcmFromSheets();
-                  showToast('RCM data refreshed from Sheets');
-                } finally {
-                  setIsSyncing(false);
-                }
-              }} 
-              disabled={isSyncing}
-            >
-              {isSyncing ? "Refreshing..." : "Refresh"}
+            <button className="btn-action btn-refresh" onClick={async () => {
+              setIsSyncing(true);
+              try {
+                if (fetchRcmFromSheets) await fetchRcmFromSheets();
+                showToast('RCM data refreshed from Sheets');
+              } finally {
+                setIsSyncing(false);
+              }
+            }} disabled={isSyncing}>
+              <span className="icon-wrapper"><RefreshCw size={16} /></span>
+              <span>{isSyncing ? "Refreshing..." : "Refresh"}</span>
             </button>
             
             {!isLocked && (

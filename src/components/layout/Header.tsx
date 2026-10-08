@@ -9,21 +9,25 @@ const PAGE_META = {
   '/dashboard': { title: 'Dashboard', sub: 'Audit intelligence overview' },
   '/liability': { title: 'Liability Dashboard', sub: 'Output GST vs Input GST, at a glance' },
   '/payment': { title: 'Payment Dashboard', sub: 'Final working ITC and Liability' },
-  '/books': { title: 'Books Reco with 2B', sub: 'Central reconciliation control screen' },
-  '/gstr2b': { title: 'GSTR-2B Data', sub: 'Auto-drafted ITC statement from GSTN' },
+  '/books': { title: 'Books ITC', sub: 'Central reconciliation control screen' },
+  '/gstr2b': { title: 'GSTR-2B All Months', sub: 'Auto-drafted ITC statement from GSTN' },
+  '/gstr2b-gov': { title: 'GSTR-2B Current Month', sub: 'Current month auto-drafted ITC statement' },
   '/rcmdata': { title: 'RCM Invoices', sub: 'Reverse charge purchases tracked separately from 2B' },
-  '/reconciliation': { title: 'Reconciliation', sub: 'Books vs GSTR-2B, matched line by line' },
+  '/reconciliation': { title: 'ITC Reconciliation', sub: 'Books vs GSTR-2B, matched line by line' },
+  '/old-itc': { title: 'Old ITC', sub: 'Old ITC carried forward' },
+  '/itc-not-claimed': { title: 'ITC Not Claimed', sub: 'ITC not yet claimed' },
+  '/reverse-itc': { title: 'Reverse ITC', sub: 'ITC reversed' },
+  '/difference-data': { title: 'Difference Data', sub: 'Discrepancies' },
   '/reports': { title: 'Reports', sub: 'Summaries built from the reconciliation' },
   '/import': { title: 'Import', sub: 'Bring in your books and GSTR-2B data' },
   '/company': { title: 'Company / GSTIN', sub: 'Manage entities you audit' },
   '/settings': { title: 'Settings', sub: 'Matching rules and data controls' },
-  '/gstr1': { title: 'GSTR-1 Sales Register', sub: 'Complete sales register and outward supplies for accurate GST return filing.' },
-  '/gstr2b-gov': { title: 'GSTR-2B Gov', sub: 'Current month auto-drafted ITC statement' }
+  '/gstr1': { title: 'GSTR-1 Sales Register', sub: 'Complete sales register and outward supplies for accurate GST return filing.' }
 };
 
 export default function Topbar({ toggleSidebar }) {
   const { 
-    companies, activeCompanyId, financialYear, month, settings, 
+    companies, activeCompanyId, activeCompany, financialYear, month, settings, 
     updateState, toggleTheme, FY_LIST, MONTHS 
   } = useAppContext();
 
@@ -57,8 +61,18 @@ export default function Topbar({ toggleSidebar }) {
           
         
         <div>
-          <div className="page-title">{meta.title}</div>
-          <div className="page-sub">{meta.sub}</div>
+          <div className="page-title">{activeCompany?.name || 'GST RecoManager'}</div>
+          <div className="page-sub">
+            <span style={{fontWeight: 600, color: 'var(--accent)'}}>{meta.title}</span> 
+            <span style={{color: 'var(--muted)', margin: '0 6px'}}>•</span> 
+            {meta.sub}
+            {activeCompany?.gstin && (
+              <>
+                <span style={{color: 'var(--muted)', margin: '0 6px'}}>•</span> 
+                GSTIN: <span style={{fontFamily: 'monospace', fontWeight: 500}}>{activeCompany.gstin}</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="topbar-controls">
@@ -66,15 +80,7 @@ export default function Topbar({ toggleSidebar }) {
           {getThemeIcon()}
         </button>
         
-        <select 
-          className="ctrl" 
-          value={activeCompanyId}
-          onChange={(e) => updateState({ activeCompanyId: e.target.value })}
-        >
-          {companies.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+        
         <select 
           className="ctrl" 
           value={financialYear}
@@ -102,7 +108,7 @@ export default function Topbar({ toggleSidebar }) {
             </div>
             {user?.name || user?.email || 'User'}
           </div>
-          <button className="btn ghost danger" onClick={logout} title="Logout" style={{ padding: '6px' }}>
+          <button className="btn-action btn-clear" onClick={logout} title="Logout" style={{ padding: '0', width: '38px', height: '38px', justifyContent: 'center', marginLeft: '4px' }}>
             <LogOut size={16} />
           </button>
         </div>
