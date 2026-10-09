@@ -333,21 +333,7 @@ export function AppProvider({ children }) {
           };
         });
         
-        // Ensure that if a specific month was explicitly cleared locally in gstr2b_gov,
-        // it doesn't resurrect from the remote gstr2b sheet due to sync failure.
-        // A simple way: find all (fy, month) in mappedData. If that (fy, month) has 0 rows in state.gstr2b_gov,
-        // we assume it was cleared, but only if we know it was cleared.
-        // Since we can't be perfectly sure, maybe it's better to just use the mappedData directly, 
-        // but if the current selected period is empty in gstr2b_gov, remove it from mappedData too.
-        const currentGov = (state.gstr2b_gov || []).filter(
-          (r) => r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month
-        );
         let finalData = mappedData;
-        if (currentGov.length === 0) {
-          finalData = finalData.filter(
-            (r) => !(r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month)
-          );
-        }
         
         updateState({ gstr2b: finalData });
       }
