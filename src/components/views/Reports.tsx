@@ -29,8 +29,8 @@ const STATUS_META = {
 };
 
 export default function Reports() {
-  const { currentBooks, currentGstr2b, currentRcm, activeCompany, month, financialYear, settings, books, gstr2b, FY_LIST, MONTHS, resolutions } = useAppContext();
-  const { showToast } = useToast();
+  const { currentBooks = [], currentGstr2b = [], currentRcm = [], activeCompany, month, financialYear, settings, books = [], gstr2b = [], FY_LIST = [], MONTHS = [], resolutions } = useAppContext() as any;
+  const { showToast } = useToast() as any;
   const [activeTab, setActiveTab] = useState(REPORT_TABS[0]);
 
   const rows = runReconciliation(currentBooks, currentGstr2b, settings.tolerance, settings.normalizeInvoice, resolutions);
@@ -46,21 +46,21 @@ export default function Reports() {
     }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reconSheet), 'Reconciliation');
 
-    const summarySheet = Object.keys(sum.counts).map(k => ({ Status: k, Invoices: sum.counts[k], 'Tax Value': sum.values[k] }));
+    const summarySheet = Object.keys(sum.counts).map(k => ({ Status: k, Invoices: (sum.counts as any)[k], 'Tax Value': (sum.values as any)[k] }));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summarySheet), 'Match Summary');
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(currentBooks.map(r => ({
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((currentBooks as any[]).map((r: any) => ({
       'Invoice No': r.invoiceNo, 'Invoice Date': r.invoiceDate, 'Supplier GSTIN': r.gstin, 'Supplier Name': r.supplierName,
       'Taxable Value': r.taxable, IGST: r.igst, CGST: r.cgst, SGST: r.sgst, Cess: r.cess,
     }))), 'Books');
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(currentGstr2b.map(r => ({
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((currentGstr2b as any[]).map((r: any) => ({
       GSTIN: r.gstin, 'Supplier Name': r.supplierName, 'Invoice No': r.invoiceNo, 'Invoice Date': r.invoiceDate,
       'Taxable Value': r.taxable, IGST: r.igst, CGST: r.cgst, SGST: r.sgst, Cess: r.cess,
       'Supplier Type': r.supplierType || '', 'GSTR-1 Filed': r.gstr1Filed || '',
     }))), 'GSTR-2B');
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(currentRcm.map(r => ({
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((currentRcm as any[]).map((r: any) => ({
       'Invoice No': r.invoiceNo, 'Invoice Date': r.invoiceDate, 'Supplier GSTIN': r.gstin, 'Supplier Name': r.supplierName,
       'Taxable Value': r.taxable, IGST: r.igst, CGST: r.cgst, SGST: r.sgst, Cess: r.cess,
     }))), 'RCM');
@@ -69,14 +69,7 @@ export default function Reports() {
     showToast('Export saved');
   };
 
-  if (currentBooks.length === 0 && currentGstr2b.length === 0) {
-    return (
-      <EmptyState 
-        title="No data to report on" 
-        sub="Import or load sample data for this period to generate reports." 
-      />
-    );
-  }
+
 
   const renderTabContent = () => {
     if (activeTab === 'Match Summary') {
@@ -88,8 +81,8 @@ export default function Reports() {
             </thead>
             <tbody>
               {Object.keys(sum.counts).map(k => {
-                const meta = STATUS_META[k];
-                const pct = sum.total ? (sum.counts[k] / sum.total * 100).toFixed(1) : '0.0';
+                const meta = (STATUS_META as any)[k];
+                const pct = sum.total ? ((sum.counts as any)[k] / sum.total * 100).toFixed(1) : '0.0';
                 return (
                   <tr key={k}>
                     <td>
@@ -97,8 +90,8 @@ export default function Reports() {
                         <span className={`dot ${meta.dot}`}></span>{k}
                       </span>
                     </td>
-                    <td className="num">{fmtNum(sum.counts[k])}</td>
-                    <td className="num">{fmtINR(sum.values[k])}</td>
+                    <td className="num">{fmtNum((sum.counts as any)[k])}</td>
+                    <td className="num">{fmtINR((sum.values as any)[k])}</td>
                     <td className="num">{pct}%</td>
                   </tr>
                 );
@@ -110,7 +103,7 @@ export default function Reports() {
     }
     
     if (activeTab === 'Supplier-wise') {
-      const bySupplier = {};
+      const bySupplier: any = {};
       rows.forEach(r => {
         const key = r.gstin || 'Unknown';
         if (!bySupplier[key]) {
@@ -124,7 +117,7 @@ export default function Reports() {
         else b.mismatch++;
         b.taxDiff += Math.abs(r.diffTax || 0);
       });
-      const list = Object.values(bySupplier).sort((a, b) => b.taxDiff - a.taxDiff);
+      const list = (Object.values(bySupplier) as any[]).sort((a: any, b: any) => b.taxDiff - a.taxDiff);
       
       return (
         <div className="table-wrap">
@@ -133,7 +126,7 @@ export default function Reports() {
               <tr><th>Supplier</th><th>GSTIN</th><th className="num">Matched</th><th className="num">Mismatch</th><th className="num">Missing 2B</th><th className="num">Missing Books</th><th className="num">Dup</th><th className="num">Tax Diff</th></tr>
             </thead>
             <tbody>
-              {list.map((b, i) => (
+              {list.map((b: any, i: any) => (
                 <tr key={i}>
                   <td>{b.name}</td>
                   <td className="mono">{b.gstin}</td>
@@ -154,13 +147,13 @@ export default function Reports() {
     if (activeTab === 'Month-wise') {
       const co = activeCompany?.id;
       const fy = financialYear;
-      const byMonth = MONTHS.map(m => {
-        const b = books.filter(r => r.companyId === co && r.fy === fy && r.month === m);
-        const g = gstr2b.filter(r => r.companyId === co && r.fy === fy && r.month === m);
+      const byMonth = (MONTHS as any[]).map((m: any) => {
+        const b = (books as any[]).filter((r: any) => r.companyId === co && r.fy === fy && r.month === m);
+        const g = (gstr2b as any[]).filter((r: any) => r.companyId === co && r.fy === fy && r.month === m);
         return { 
           month: m, books: b.length, g2b: g.length, 
-          itcBooks: b.reduce((a, r) => a + taxTotal(r), 0), 
-          itc2b: g.reduce((a, r) => a + taxTotal(r), 0) 
+          itcBooks: b.reduce((a: any, r: any) => a + taxTotal(r), 0), 
+          itc2b: g.reduce((a: any, r: any) => a + taxTotal(r), 0) 
         };
       });
       
@@ -171,7 +164,7 @@ export default function Reports() {
               <tr><th>Month</th><th className="num">Books Invoices</th><th className="num">2B Invoices</th><th className="num">ITC Books</th><th className="num">ITC 2B</th><th className="num">Gap</th></tr>
             </thead>
             <tbody>
-              {byMonth.map(m => (
+              {byMonth.map((m: any) => (
                 <tr key={m.month} style={m.month === month ? { background: 'rgba(255,122,61,.06)' } : {}}>
                   <td>{m.month}</td>
                   <td className="num">{m.books}</td>
@@ -198,8 +191,8 @@ export default function Reports() {
     }
     
     if (activeTab === 'ITC Difference') {
-      const itcBooks = currentBooks.reduce((a, r) => a + taxTotal(r), 0);
-      const itc2b = currentGstr2b.reduce((a, r) => a + taxTotal(r), 0);
+      const itcBooks = (currentBooks as any[]).reduce((a: any, r: any) => a + taxTotal(r), 0);
+      const itc2b = (currentGstr2b as any[]).reduce((a: any, r: any) => a + taxTotal(r), 0);
       const diff = itcBooks - itc2b;
       
       return (

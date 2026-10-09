@@ -12,22 +12,15 @@ import EmptyState from '../common/EmptyState';
 import StockItemSales from '../common/StockItemSales';
 
 export default function Liability() {
-  const { currentGstr1, fyGstr1, activeCompany, month, financialYear } = useAppContext();
+  const { currentGstr1 = [], fyGstr1 = [], activeCompany, month, financialYear } = useAppContext() as any;
 
-  if (!currentGstr1 || currentGstr1.length === 0) {
-    return (
-      <EmptyState 
-        title="No liability data for this period" 
-        sub={`No GSTR-1 Sales data found for ${activeCompany?.name || 'this company'} · ${month} FY${financialYear}. Import data to view sales liability analytics.`} 
-      />
-    );
-  }
+
 
   // Basic Calculations for current month
-  const mTotalTaxable = currentGstr1.reduce((a, r) => a + (Number(r.taxable) || 0), 0);
-  const mTotalIgst = currentGstr1.reduce((a, r) => a + (Number(r.igst) || 0), 0);
-  const mTotalCgst = currentGstr1.reduce((a, r) => a + (Number(r.cgst) || 0), 0);
-  const mTotalSgst = currentGstr1.reduce((a, r) => a + (Number(r.sgst) || 0), 0);
+  const mTotalTaxable = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.taxable) || 0), 0);
+  const mTotalIgst = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.igst) || 0), 0);
+  const mTotalCgst = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.cgst) || 0), 0);
+  const mTotalSgst = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.sgst) || 0), 0);
   const mOutput = mTotalIgst + mTotalCgst + mTotalSgst;
 
   // Chart Data (Mock trend scaled to Current Month)
@@ -55,8 +48,8 @@ export default function Liability() {
   ];
 
   // Top 5 Inter-State (Liability Focus)
-  const interStateSales = fyGstr1.filter(r => (Number(r.igst) || 0) > 0);
-  const interGrouped = interStateSales.reduce((acc, r) => {
+  const interStateSales = (fyGstr1 as any[]).filter((r: any) => (Number(r.igst) || 0) > 0);
+  const interGrouped = interStateSales.reduce((acc: any, r: any) => {
     const key = r.pos || 'Unknown';
     if (!acc[key]) acc[key] = { pos: key, taxable: 0, igst: 0, count: 0 };
     acc[key].taxable += (Number(r.taxable) || 0);
@@ -64,22 +57,22 @@ export default function Liability() {
     acc[key].count += 1;
     return acc;
   }, {});
-  const top5Inter = Object.values(interGrouped).sort((a, b) => b.igst - a.igst).slice(0, 5);
+  const top5Inter = (Object.values(interGrouped) as any[]).sort((a: any, b: any) => b.igst - a.igst).slice(0, 5);
   const maxInterIgst = top5Inter.length > 0 ? top5Inter[0].igst : 1;
 
   // Top 5 Intra-State (Party Name, Sale Amt, Invoice Count, Item Name)
-  const intraStateSales = fyGstr1.filter(r => (Number(r.igst) || 0) === 0 && ((Number(r.cgst) || 0) > 0 || (Number(r.sgst) || 0) > 0));
-  const intraGrouped = intraStateSales.reduce((acc, r) => {
+  const intraStateSales = (fyGstr1 as any[]).filter((r: any) => (Number(r.igst) || 0) === 0 && ((Number(r.cgst) || 0) > 0 || (Number(r.sgst) || 0) > 0));
+  const intraGrouped = intraStateSales.reduce((acc: any, r: any) => {
     const key = r.customerName || 'Retail Customer';
     if (!acc[key]) acc[key] = { party: key, taxable: 0, count: 0, item: r.description || 'Assorted Goods' };
     acc[key].taxable += (Number(r.taxable) || 0);
     acc[key].count += 1;
     return acc;
   }, {});
-  const top5Intra = Object.values(intraGrouped).sort((a, b) => b.taxable - a.taxable).slice(0, 5);
+  const top5Intra = (Object.values(intraGrouped) as any[]).sort((a: any, b: any) => b.taxable - a.taxable).slice(0, 5);
 
   // Recent Sales Invoices (Mock data using the real context if available, or just mock)
-  const recentSales = currentGstr1.slice(0, 8).map(r => ({
+  const recentSales = (currentGstr1 as any[]).slice(0, 8).map((r: any) => ({
     date: r.invoiceDate || '26 Apr 2026',
     invoice: r.invoiceNo || 'INV-001',
     party: r.customerName || 'Retail Customer',
@@ -89,7 +82,7 @@ export default function Liability() {
     sc: r.customerName ? 'blue' : 'yellow'
   }));
 
-  const renderCustomDonut = (data, totalLabel, totalValue, totalSubLabel) => (
+  const renderCustomDonut = (data: any, totalLabel: any, totalValue: any, totalSubLabel?: any) => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%', padding: '10px 0' }}>
       <div className="od-donut-wrap" style={{ width: '140px', height: '140px', flex: 'none' }}>
         <RechartsPieChart width={140} height={140}>
@@ -103,7 +96,7 @@ export default function Liability() {
             cx="50%"
             cy="50%"
           >
-            {data.map((entry, index) => (
+            {data.map((entry: any, index: any) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
@@ -114,8 +107,8 @@ export default function Liability() {
         </div>
       </div>
       <div className="od-legend" style={{ marginLeft: 0, width: '100%', maxWidth: '220px' }}>
-        {data.map((item, i) => {
-          const total = data.reduce((a, b) => a + b.value, 0);
+        {data.map((item: any, i: any) => {
+          const total = data.reduce((a: any, b: any) => a + b.value, 0);
           const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
           return (
             <div className="od-legend-item" key={i}>
@@ -220,7 +213,7 @@ export default function Liability() {
             <div className="od-panel-title">GST Composition <span style={{ color: 'var(--muted)', fontWeight: 500 }}>(This Month)</span></div>
           </div>
           <div className="od-panel-body" style={{ justifyContent: 'center' }}>
-            {renderCustomDonut(gstCompData, "Total Output", fmtINR(mOutput))}
+            {renderCustomDonut(gstCompData, "Total Output", fmtINR(mOutput), "")}
           </div>
         </div>
 
@@ -229,7 +222,7 @@ export default function Liability() {
             <div className="od-panel-title">Sales Split <span style={{ color: 'var(--muted)', fontWeight: 500 }}>(This Month)</span></div>
           </div>
           <div className="od-panel-body" style={{ justifyContent: 'center' }}>
-            {renderCustomDonut(salesSplitData, "Total Sales", fmtINR(mTotalTaxable))}
+            {renderCustomDonut(salesSplitData, "Total Sales", fmtINR(mTotalTaxable), "")}
           </div>
         </div>
 
@@ -244,7 +237,7 @@ export default function Liability() {
           <div className="od-panel-body" style={{ padding: '16px' }}>
             {top5Inter.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {top5Inter.map((s, i) => {
+                {top5Inter.map((s: any, i: any) => {
                   const colors = ['var(--blue)', 'var(--purple)', 'var(--green)', 'var(--accent)', 'var(--yellow)'];
                   const c = colors[i % colors.length];
                   const pct = Math.min(100, (s.igst / maxInterIgst) * 100);
@@ -284,7 +277,7 @@ export default function Liability() {
           <div className="od-panel-body" style={{ padding: '16px' }}>
             {top5Intra.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {top5Intra.map((s, i) => (
+                {top5Intra.map((s: any, i: any) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--panel)', border: '1px solid var(--border-soft)', borderRadius: '10px' }}>
                     <div style={{ flex: 1, minWidth: 0, paddingRight: '16px' }}>
                       <div style={{ fontWeight: 600, fontSize: '13px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--fg)' }}>{s.party}</div>
@@ -327,7 +320,7 @@ export default function Liability() {
                 </tr>
               </thead>
               <tbody>
-                {recentSales.map((t, i) => (
+                {recentSales.map((t: any, i: any) => (
                   <tr key={i}>
                     <td style={{ color: 'var(--muted)', fontSize: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

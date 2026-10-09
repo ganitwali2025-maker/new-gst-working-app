@@ -1,4 +1,4 @@
-const STORE_KEY = 'reconiq_v1';
+const STORE_KEY = 'gst_app_v2';
 export const FY_LIST = ['2023-24','2024-25','2025-26','2026-27'];
 export const MONTHS = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
 
@@ -12,8 +12,7 @@ export function todayFY(){
 export function defaultState(){
   return {
     companies: [
-      { id: 'c1', name: 'Aarav Textiles Pvt Ltd', gstin: '23AAACA1234F1Z5' },
-      { id: 'c2', name: 'Meridian Auto Components', gstin: '27AAECM5678K1Z2' },
+      { id: 'c1', name: 'Passary Minerals Madhya Pvt Ltd', gstin: '22AAHCP9274B1ZI' }
     ],
     activeCompanyId: 'c1',
     financialYear: todayFY(),

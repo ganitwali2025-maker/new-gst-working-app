@@ -7,8 +7,8 @@ import ImportBox from '../common/ImportBox';
 import { fmtINR } from '../../utils/format';
 import { taxTotal } from '../../utils/invoice';
 
-export default function GenericTablePage({ title, hint, type = 'books' }) {
-      const { activeCompany, month, financialYear, currentBooks, currentGstr2b, currentGstr2bGov, currentGstr1, updateState, gstr1, activeCompanyId, checkIsLocked, toggleLock, clearCurrentPeriod, fetchGstr1FromSheets, fetchBooksFromSheets, fetchGstr2bGovFromSheets, syncGstr1ToSheets, syncBooksToSheets, syncGstr2bGovToSheets } = useAppContext();
+export default function GenericTablePage({ title, hint, type = 'books' }: { title: string, hint?: string, type?: string }) {
+      const { activeCompany, month, financialYear, currentBooks, currentGstr2b, currentGstr2bGov, currentGstr1, updateState, gstr1, activeCompanyId, checkIsLocked, toggleLock, clearCurrentPeriod, fetchGstr1FromSheets, fetchBooksFromSheets, fetchGstr2bGovFromSheets, syncGstr1ToSheets, syncBooksToSheets, syncGstr2bGovToSheets } = useAppContext() as any;
   const [isSyncing, setIsSyncing] = useState(false);
   
     React.useEffect(() => {
@@ -17,7 +17,7 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
   
   const isLocked = checkIsLocked(type);
   
-  let rows = [];
+  let rows: any[] = [];
     if (type === 'books') rows = currentBooks;
   else if (type === 'g2b') rows = currentGstr2b; else if (type === 'g2b_gov') rows = currentGstr2bGov || [];
   else if (type === 'gstr1') rows = currentGstr1;
@@ -79,7 +79,7 @@ export default function GenericTablePage({ title, hint, type = 'books' }) {
             )}
           </div>
         </div>
-        <DataTable rows={rows} isBooks={type === 'books'} type={type} dataType={!isLocked ? type : null} />
+        <DataTable rows={rows} isBooks={type === 'books'} isRcm={false} type={type} dataType={!isLocked ? type : null} />
       </div>
     </>
   );

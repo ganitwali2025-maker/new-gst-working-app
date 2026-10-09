@@ -6,7 +6,7 @@ import {
 
 export default function Payment() {
   const [period, setPeriod] = useState('September 2026');
-  const fmt = (num) => '₹ ' + num.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  const fmt = (num: number) => '₹ ' + num.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 
   return (
     <div>

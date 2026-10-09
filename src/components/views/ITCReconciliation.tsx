@@ -9,8 +9,8 @@ import EmptyState from '../common/EmptyState';
 import { useToast } from '../common/Toast';
 
 export default function Reconciliation() {
-  const { currentBooks, currentGstr2b, activeCompany, month, financialYear, settings, resolutions } = useAppContext();
-  const { showToast } = useToast();
+  const { currentBooks = [], currentGstr2b = [], activeCompany, month, financialYear, settings, resolutions } = useAppContext() as any;
+  const { showToast } = useToast() as any;
   
   const [filter, setFilter] = useState('Matched');
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,16 +52,9 @@ export default function Reconciliation() {
     showToast('Export saved');
   };
 
-  if (currentBooks.length === 0 && currentGstr2b.length === 0) {
-    return (
-      <EmptyState 
-        title="Nothing to reconcile yet" 
-        sub="Import books or GSTR-2B data for this period, then come back here — matching runs automatically." 
-      />
-    );
-  }
 
-  const Chip = ({ val, label, count }) => (
+
+  const Chip = ({ val, label, count }: any) => (
     <button 
       className={`chip ${filter === val ? 'active' : ''}`} 
       onClick={() => setFilter(val)}

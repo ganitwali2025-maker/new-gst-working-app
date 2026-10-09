@@ -13,15 +13,15 @@ import TaxSummaryCards from '../common/TaxSummaryCards';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { currentBooks, currentGstr2b, activeCompany, month, financialYear, settings } = useAppContext();
+  const { currentBooks = [], currentGstr2b = [], activeCompany, month, financialYear, settings } = useAppContext() as any;
 
   const rows = runReconciliation(currentBooks, currentGstr2b, settings.tolerance, settings.normalizeInvoice);
   const sum = reconSummary(rows);
 
-  const totalPurchase = currentBooks.reduce((a, r) => a + Number(r.taxable || 0), 0);
-  const totalG2bTaxable = currentGstr2b.reduce((a, r) => a + Number(r.taxable || 0), 0);
-  const itcBooks = currentBooks.reduce((a, r) => a + taxTotal(r), 0);
-  const itcG2b = currentGstr2b.reduce((a, r) => a + taxTotal(r), 0);
+  const totalPurchase = (currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
+  const totalG2bTaxable = (currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
+  const itcBooks = (currentBooks as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0);
+  const itcG2b = (currentGstr2b as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0);
   const mismatchITC = rows.filter(r => r.status === 'Amount Mismatch').reduce((a, r) => a + Math.abs(r.diffTax || 0), 0);
 
   const matchedRows = rows.filter(r => r.status === 'Matched');
@@ -39,18 +39,18 @@ export default function Dashboard() {
   const unmatchedCess = unmatchedRows.reduce((a, r) => a + Math.abs(r.diffCess || 0), 0);
 
   const statsBooks = {
-    total: fmtINR(currentBooks.reduce((a, r) => a + taxTotal(r), 0)),
-    igst: fmtINR(currentBooks.reduce((a, r) => a + Number(r.igst || 0), 0)),
-    cgst: fmtINR(currentBooks.reduce((a, r) => a + Number(r.cgst || 0), 0)),
-    sgst: fmtINR(currentBooks.reduce((a, r) => a + Number(r.sgst || 0), 0)),
-    cess: fmtINR(currentBooks.reduce((a, r) => a + Number(r.cess || 0), 0))
+    total: fmtINR((currentBooks as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0)),
+    igst: fmtINR((currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.igst || 0), 0)),
+    cgst: fmtINR((currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.cgst || 0), 0)),
+    sgst: fmtINR((currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.sgst || 0), 0)),
+    cess: fmtINR((currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.cess || 0), 0))
   };
   const statsG2b = {
-    total: fmtINR(currentGstr2b.reduce((a, r) => a + taxTotal(r), 0)),
-    igst: fmtINR(currentGstr2b.reduce((a, r) => a + Number(r.igst || 0), 0)),
-    cgst: fmtINR(currentGstr2b.reduce((a, r) => a + Number(r.cgst || 0), 0)),
-    sgst: fmtINR(currentGstr2b.reduce((a, r) => a + Number(r.sgst || 0), 0)),
-    cess: fmtINR(currentGstr2b.reduce((a, r) => a + Number(r.cess || 0), 0))
+    total: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0)),
+    igst: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.igst || 0), 0)),
+    cgst: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.cgst || 0), 0)),
+    sgst: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.sgst || 0), 0)),
+    cess: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.cess || 0), 0))
   };
   const statsMatched = {
     total: fmtINR(matchedITC),
@@ -67,14 +67,7 @@ export default function Dashboard() {
     cess: fmtINR(unmatchedCess)
   };
 
-  if (currentBooks.length === 0 && currentGstr2b.length === 0) {
-    return (
-      <EmptyState 
-        title="No data for this period yet" 
-        sub={`No books or GSTR-2B data found for ${activeCompany?.name || 'this company'} · ${month} FY${financialYear}. Import data or load a sample to see the audit come alive.`} 
-      />
-    );
-  }
+
 
   return (
     <>
