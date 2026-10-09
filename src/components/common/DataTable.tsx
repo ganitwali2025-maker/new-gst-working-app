@@ -302,10 +302,10 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               <>
                 <th>Month</th>
                 <th>Quarter</th>
-                <th>Financial Year</th>
+                <th style={{textAlign: "center"}}>Financial Year</th>
                 <th>Entry Date</th>
                 <th>Transporter Name</th>
-                <th>Transporter L.R. No.</th>
+                <th style={{textAlign: "center"}}>Transporter L.R. No.</th>
                 <th className="num" style={{textAlign: "center"}}>Amount</th>
                 <th className="num" style={{textAlign: "center"}}>IGST 5%</th>
                 <th className="num" style={{textAlign: "center"}}>CGST 2.5%</th>
@@ -316,11 +316,11 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               <>
                 <th>Month</th>
                 <th>Quarter</th>
-                <th>Financial Year</th>
+                <th style={{textAlign: "center"}}>Financial Year</th>
                 <th>Date</th>
                 <th>GSTIN of Supplier</th>
                 <th>Trade / Legal Name</th>
-                <th>Invoice No</th>
+                <th style={{textAlign: "center"}}>Invoice No</th>
                 <th className="num" style={{textAlign: "center"}}>Invoice Value</th>
                 <th className="num" style={{textAlign: "center"}}>Taxable Value</th>
                 <th className="num" style={{textAlign: "center"}}>IGST</th>
@@ -333,11 +333,11 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               <>
                 <th>Month</th>
                 <th>Quarter</th>
-                <th>Financial Year</th>
+                <th style={{textAlign: "center"}}>Financial Year</th>
                 <th>Invoice Date</th>
                 <th>{type === 'books' ? 'Name of Supplier' : 'Supplier / Party Name'}</th>
                 <th>{type === 'books' ? 'GST No.' : 'GST No'}</th>
-                <th>Invoice No</th>
+                <th style={{textAlign: "center"}}>Invoice No</th>
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'BESIC AS PER BOOK' : 'Taxable Value'}</th>
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Integrated Tax (₹)' : 'IGST'}</th>
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Central Tax (₹)' : 'CGST'}</th>
@@ -350,7 +350,7 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               <>
                 <th>Priority</th>
                 <th>Status</th>
-                <th>Invoice No.</th>
+                <th style={{textAlign: "center"}}>Invoice No.</th>
                 <th>Date</th>
                 <th>{isBooks ? 'Supplier' : 'Supplier'} GSTIN</th>
                 <th>Supplier Name</th>
@@ -379,10 +379,10 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                 <tr key={r.id || i}>
                   <td>{esc(r.month)}</td>
                   <td>{esc(r.quarter) === 'Q1' ? 'Q1 (Apr-Jun)' : esc(r.quarter) === 'Q2' ? 'Q2 (Jul-Sep)' : esc(r.quarter) === 'Q3' ? 'Q3 (Oct-Dec)' : esc(r.quarter) === 'Q4' ? 'Q4 (Jan-Mar)' : esc(r.quarter) || 'Q'}</td>
-                  <td>{esc(r.fy)}</td>
+                  <td style={{textAlign: "center"}}>{esc(r.fy)}</td>
                   <td>{esc(r.entryDate || r.invoiceDate)}</td>
                   <td>{esc(r.transporterName || r.supplierName)}</td>
-                  <td>{esc(r.lrNo || r.invoiceNo)}</td>
+                  <td style={{textAlign: "center"}}>{esc(r.lrNo || r.invoiceNo)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.amount || r.taxable)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
@@ -411,11 +411,11 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                 <tr key={r.id || i}>
                   <td>{esc(r.month)}</td>
                   <td>{esc(r.quarter) === 'Q1' ? 'Q1 (Apr-Jun)' : esc(r.quarter) === 'Q2' ? 'Q2 (Jul-Sep)' : esc(r.quarter) === 'Q3' ? 'Q3 (Oct-Dec)' : esc(r.quarter) === 'Q4' ? 'Q4 (Jan-Mar)' : esc(r.quarter) || 'Q'}</td>
-                  <td>{esc(r.fy)}</td>
+                  <td style={{textAlign: "center"}}>{esc(r.fy)}</td>
                   <td>{esc(r.invoiceDate)}</td>
                   <td className="mono">{esc(r.gstin)}</td>
                   <td>{esc(r.supplierName)}</td>
-                  <td>{esc(r.invoiceNo)}</td>
+                  <td style={{textAlign: "center"}}>{esc(r.invoiceNo)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.taxable)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
@@ -446,11 +446,11 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                 <tr key={r.id || i}>
                   <td>{esc(r.month)}</td>
                   <td>{esc(r.quarter) === 'Q1' ? 'Q1 (Apr-Jun)' : esc(r.quarter) === 'Q2' ? 'Q2 (Jul-Sep)' : esc(r.quarter) === 'Q3' ? 'Q3 (Oct-Dec)' : esc(r.quarter) === 'Q4' ? 'Q4 (Jan-Mar)' : esc(r.quarter) || 'Q'}</td>
-                  <td>{esc(r.fy)}</td>
+                  <td style={{textAlign: "center"}}>{esc(r.fy)}</td>
                   <td>{esc(r.invoiceDate)}</td>
                   <td>{esc(r.supplierName)}</td>
                   <td className="mono">{esc(r.gstin)}</td>
-                  <td>{esc(r.invoiceNo)}</td>
+                  <td style={{textAlign: "center"}}>{esc(r.invoiceNo)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.taxable)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
@@ -488,7 +488,7 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                   '—'
                 )}
               </td>
-              <td>{esc(r.invoiceNo)}</td>
+              <td style={{textAlign: "center"}}>{esc(r.invoiceNo)}</td>
               <td>{esc(r.invoiceDate)}</td>
               <td className="mono">{esc(r.gstin)}</td>
               <td>{esc(r.supplierName)}</td>

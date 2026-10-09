@@ -70,10 +70,27 @@ export function AppProvider({ children }) {
     const newData = state[storeKey].filter(
       (r) => !(r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month)
     );
-    updateState({ [storeKey]: newData });
+    
+    let updates = { [storeKey]: newData };
+    
+    if (type === 'g2b_gov') {
+      const newGstr2b = (state.gstr2b || []).filter(
+        (r) => !(r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month)
+      );
+      updates['gstr2b'] = newGstr2b;
+    }
+    
+    updateState(updates);
+    
     if (type === 'gstr1' && typeof syncGstr1ToSheets === 'function') syncGstr1ToSheets(newData);
     if (type === 'books' && typeof syncBooksToSheets === 'function') syncBooksToSheets(newData);
-    if (type === 'g2b_gov' && typeof syncGstr2bGovToSheets === 'function') syncGstr2bGovToSheets(newData);
+    if (type === 'g2b_gov') {
+      if (typeof syncGstr2bGovToSheets === 'function') syncGstr2bGovToSheets(newData);
+      if (typeof syncGstr2bToSheets === 'function') syncGstr2bToSheets(updates['gstr2b']);
+    }
+    if (type === 'gstr2b') {
+      if (typeof syncGstr2bToSheets === 'function') syncGstr2bToSheets(newData);
+    }
   };
 
   const loadSample = () => {
@@ -315,7 +332,24 @@ export function AppProvider({ children }) {
             remark: r["remark"] || r["Remark"] || ""
           };
         });
-        updateState({ gstr2b: mappedData });
+        
+        // Ensure that if a specific month was explicitly cleared locally in gstr2b_gov,
+        // it doesn't resurrect from the remote gstr2b sheet due to sync failure.
+        // A simple way: find all (fy, month) in mappedData. If that (fy, month) has 0 rows in state.gstr2b_gov,
+        // we assume it was cleared, but only if we know it was cleared.
+        // Since we can't be perfectly sure, maybe it's better to just use the mappedData directly, 
+        // but if the current selected period is empty in gstr2b_gov, remove it from mappedData too.
+        const currentGov = (state.gstr2b_gov || []).filter(
+          (r) => r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month
+        );
+        let finalData = mappedData;
+        if (currentGov.length === 0) {
+          finalData = finalData.filter(
+            (r) => !(r.companyId === state.activeCompanyId && r.fy === state.financialYear && r.month === state.month)
+          );
+        }
+        
+        updateState({ gstr2b: finalData });
       }
     } catch (e) {
       console.error('Failed to fetch 2B All Months:', e);
@@ -334,6 +368,20 @@ export function AppProvider({ children }) {
       console.error('Failed to sync 2B GOV:', e);
     }
   };
+
+  const syncGstr2bToSheets = async (dataToSync, action = "SYNC_ALL") => {
+    try {
+      let payload = { action, type: 'gstr2b', data: dataToSync };
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.error('Failed to sync 2B All Months:', e);
+    }
+  };
+
 
   const deleteRow = (type, rowId) => {
     const newData = state[type].filter(r => r.id !== rowId);
@@ -406,6 +454,7 @@ export function AppProvider({ children }) {
     fetchRcmFromSheets,
     syncGstr2bGovToSheets,
     fetchGstr2bGovFromSheets,
+    syncGstr2bToSheets,
     fetchGstr2bFromSheets,
     currentGstr2bGov,
     loadSample,

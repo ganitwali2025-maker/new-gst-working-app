@@ -11,6 +11,7 @@ import Liability from './components/views/LiabilityDashboard';
 import BooksPurchase from './components/views/BooksPurchase';
 import GSTR2B from './components/views/GSTR2B';
 import RcmData from './components/views/RcmView';
+import RcmITC from './components/views/RcmITC';
 import Reconciliation from './components/views/ITCReconciliation';
 import Reports from './components/views/Reports';
 import Import from './components/views/Import';
@@ -23,8 +24,8 @@ import Introduction from './components/views/auth/Introduction';
 import SecureAccess from './components/views/auth/SecureAccess';
 import Login from './components/views/auth/Login';
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth() as any;
   
   if (loading) {
     return <div className="auth-page"><div className="auth-title">Loading workspace...</div></div>;
@@ -61,6 +62,7 @@ function MainLayout() {
             <Route path="/reconciliation" element={<Reconciliation />} />
             <Route path="/unmatch-gst" element={<GenericTablePage title="Unmatch GST" type="books" hint="Unmatched records" />} />
             
+            <Route path="/rcm-itc" element={<RcmITC />} />
             <Route path="/rcmdata" element={<RcmData />} />
             <Route path="/books-itc" element={<GenericTablePage title="Books ITC" type="books" hint="ITC from books" />} />
             <Route path="/gstr1" element={<GenericTablePage title="GSTR-1 Sales Register" type="gstr1" hint="Complete sales register and outward supplies for accurate GST return filing." />} />

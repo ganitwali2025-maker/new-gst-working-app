@@ -45,6 +45,6 @@ export function loadData(){
   }catch(e){ return defaultState(); }
 }
 
-export function saveData(state){
+export function saveData(state: any){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
 }

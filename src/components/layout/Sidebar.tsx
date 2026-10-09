@@ -24,6 +24,7 @@ const NAV: NavItem[] = [
   
   { isHeading: true, label: 'GST RECO STEP' },
   { id: 'reconciliation', path: '/reconciliation', label: 'Final Reconciliation Report', icon: ArrowRightLeft },
+  { id: 'rcm-itc', path: '/rcm-itc', label: 'RCM ITC', icon: Landmark },
   { isHeading: true, label: 'BOOKS RECO' },
   { id: 'books', path: '/books', label: 'Books Reco with 2B', icon: Book },
   { id: 'old-itc', path: '/old-itc', label: 'Old ITC', icon: Book },

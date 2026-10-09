@@ -54,7 +54,7 @@ const TARGET_FIELDS_RCM = [
 function parseNum(v: any){ const n = parseFloat(String(v).replace(/[,?Rs]/g,'')); return isNaN(n) ? 0 : n; }
 
 export default function ImportBox({ target = 'books' }: { target?: string }) {
-  const { activeCompanyId, month, financialYear, updateState, books, gstr2b, gstr2b_gov, rcm, gstr1, syncGstr1ToSheets, syncBooksToSheets, syncRcmToSheets, syncGstr2bGovToSheets, MONTHS, FY_LIST } = useAppContext() as any;
+  const { activeCompanyId, month, financialYear, updateState, books, gstr2b, gstr2b_gov, rcm, gstr1, syncGstr1ToSheets, syncBooksToSheets, syncRcmToSheets, syncGstr2bGovToSheets, syncGstr2bToSheets, MONTHS, FY_LIST } = useAppContext() as any;
   const { showToast } = useToast() as any;
   
   const [importing, setImporting] = useState(false);
@@ -343,6 +343,12 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
       }
       const updatedG2b = [...currentG2b, ...newRows.map((r: any) => Object.assign({}, r, { id: String(Math.random()) }))];
       updateState({ gstr2b: updatedG2b });
+      
+      if (typeof syncGstr2bToSheets === 'function') {
+        syncGstr2bToSheets(updatedG2b, "SYNC_ALL").catch(() => {
+          console.error("Failed to sync GSTR2B All Months");
+        });
+      }
     }
     
     updateState({ [storeKey]: updatedData, month: importMonth, financialYear: importFy });
@@ -391,33 +397,32 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
           }}>
             {/* Header */}
             <div style={{
-              background: 'var(--bg)',
+              background: 'var(--accent)', // Use exact theme purple
               padding: '20px 24px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              color: 'var(--text)',
-              borderBottom: '1px solid var(--border)',
+              color: 'white',
               position: 'relative',
               overflow: 'hidden'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 1 }}>
                 <div style={{
-                  background: 'white',
+                  background: 'rgba(255, 255, 255, 0.15)',
                   borderRadius: '12px',
                   width: '48px',
                   height: '48px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--accent)',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+                  color: '#e3cc9e',
+                  border: '1px solid rgba(227, 204, 158, 0.3)'
                 }}>
                   <Clipboard size={24} />
                 </div>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '600', letterSpacing: '-0.5px', color: '#ffffff' }}>Import Data</h2>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '13.5px', color: '#ffffff', opacity: 0.9 }}>Paste your Excel data from clipboard (Ctrl+V)</p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13.5px', color: 'rgba(255,255,255,0.85)', opacity: 0.9 }}>Paste your Excel data from clipboard (Ctrl+V)</p>
                 </div>
               </div>
               <button 
@@ -425,7 +430,7 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: 'var(--muted)',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   cursor: 'pointer',
                   padding: '8px',
                   borderRadius: '50%',
@@ -436,8 +441,8 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                   zIndex: 1,
                   transition: '0.2s'
                 }}
-                  onMouseOver={(e: any) => e.currentTarget.style.color = 'var(--text)'}
-                  onMouseOut={(e: any) => e.currentTarget.style.color = 'var(--muted)'}
+                  onMouseOver={(e: any) => e.currentTarget.style.color = '#ffffff'}
+                  onMouseOut={(e: any) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'}
               >
                 <X size={20} />
               </button>
@@ -448,38 +453,47 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
               
               {/* Select Options */}
               <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                <select 
-                  value={importFy} onChange={e => {
-                    setImportFy(e.target.value);
-                    updateState({ financialYear: e.target.value });
-                  }}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px', outline: 'none', color: 'var(--text)', cursor: 'pointer' }}
-                >
-                  <option value="">Select FY</option>
-                  {FY_LIST && FY_LIST.map((f: any) => <option key={f} value={f}>{f}</option>)}
-                </select>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <div style={{ position: 'absolute', top: '-8px', left: '10px', background: 'white', padding: '0 4px', fontSize: '11px', color: 'var(--accent)', fontWeight: '600', zIndex: 2 }}>Financial Year</div>
+                  <select 
+                    value={importFy} onChange={e => {
+                      setImportFy(e.target.value);
+                      updateState({ financialYear: e.target.value });
+                    }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--accent)', fontSize: '14px', fontWeight: '600', outline: 'none', color: 'var(--accent)', cursor: 'pointer', backgroundColor: '#fff' }}
+                  >
+                    <option value="">Select FY</option>
+                    {FY_LIST && FY_LIST.map((f: any) => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
 
-                <select 
-                  value={importQuarter} onChange={e => setImportQuarter(e.target.value)}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px', outline: 'none', color: 'var(--text)', cursor: 'pointer' }}
-                >
-                  <option value="">Select Quarter</option>
-                  <option value="Q1">Q1 (Apr-Jun)</option>
-                  <option value="Q2">Q2 (Jul-Sep)</option>
-                  <option value="Q3">Q3 (Oct-Dec)</option>
-                  <option value="Q4">Q4 (Jan-Mar)</option>
-                </select>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <div style={{ position: 'absolute', top: '-8px', left: '10px', background: 'white', padding: '0 4px', fontSize: '11px', color: 'var(--accent)', fontWeight: '600', zIndex: 2 }}>Current Quarter</div>
+                  <select 
+                    value={importQuarter} onChange={e => setImportQuarter(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--accent)', fontSize: '14px', fontWeight: '600', outline: 'none', color: 'var(--accent)', cursor: 'pointer', backgroundColor: '#fff' }}
+                  >
+                    <option value="">Select Quarter</option>
+                    <option value="Q1">Q1 (Apr-Jun)</option>
+                    <option value="Q2">Q2 (Jul-Sep)</option>
+                    <option value="Q3">Q3 (Oct-Dec)</option>
+                    <option value="Q4">Q4 (Jan-Mar)</option>
+                  </select>
+                </div>
 
-                <select 
-                  value={importMonth} onChange={e => {
-                    setImportMonth(e.target.value);
-                    updateState({ month: e.target.value });
-                  }}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '13px', outline: 'none', color: 'var(--text)', cursor: 'pointer' }}
-                >
-                  <option value="">Select Month</option>
-                  {MONTHS && MONTHS.map((m: any) => <option key={m} value={m}>{m}</option>)}
-                </select>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <div style={{ position: 'absolute', top: '-8px', left: '10px', background: 'white', padding: '0 4px', fontSize: '11px', color: 'var(--accent)', fontWeight: '600', zIndex: 2 }}>Select Month</div>
+                  <select 
+                    value={importMonth} onChange={e => {
+                      setImportMonth(e.target.value);
+                      updateState({ month: e.target.value });
+                    }}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--accent)', fontSize: '14px', fontWeight: '600', outline: 'none', color: 'var(--accent)', cursor: 'pointer', backgroundColor: '#fff' }}
+                  >
+                    <option value="">Month</option>
+                    {MONTHS && MONTHS.map((m: any) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
               </div>
 
               {errorMsg && (
@@ -501,31 +515,36 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
 
               {/* Textarea Container */}
               <div style={{
-                border: '1px solid var(--accent)',
+                backgroundColor: 'white',
+                border: '1px dashed var(--accent)',
                 borderRadius: '8px',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                textAlign: 'center'
               }}>
                 <div style={{
                   position: 'absolute',
                   top: '16px',
-                  left: '16px',
+                  left: '0',
+                  right: '0',
                   pointerEvents: 'none',
                   opacity: pasteText ? 0 : 1
                 }}>
-                  <div style={{ color: 'var(--accent)', fontSize: '15px', fontWeight: '500', marginBottom: '4px' }}>Click here and press Ctrl+V</div>
-                  <div style={{ color: 'var(--accent)', fontSize: '13px' }}>Paste Excel data from your clipboard</div>
+                  <div style={{ color: 'var(--accent)', fontSize: '16px', fontWeight: '500', marginBottom: '4px' }}>Click here and press Ctrl+V</div>
+                  <div style={{ color: 'var(--accent)', fontSize: '14px', marginBottom: '12px' }}>Paste Excel data from your clipboard</div>
+                  <div style={{ color: 'var(--accent)', fontSize: '14px', fontWeight: 'bold' }}>**Important: Please copy & paste the data ALONG WITH the header row. ⚠</div>
                 </div>
                 
                 <div style={{
                   position: 'absolute',
-                  right: '16px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
+                  left: '0',
+                  right: '0',
+                  bottom: '16px',
                   pointerEvents: 'none',
-                  color: pastedData.rawRows.length > 0 ? 'var(--green)' : 'var(--accent)',
+                  color: pastedData.rawRows.length > 0 ? 'var(--accent)' : 'var(--accent)',
                   fontSize: '14px',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  opacity: 0.8
                 }}>
                   {pastedData.rawRows.length > 0 ? `${pastedData.rawRows.length} rows ready` : 'No rows pasted yet'}
                 </div>
@@ -533,11 +552,11 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
                 <textarea
                   style={{
                     width: '100%',
-                    height: '140px',
+                    height: '160px',
                     padding: '16px',
                     border: 'none',
                     resize: 'vertical',
-                    minHeight: '100px',
+                    minHeight: '160px',
                     backgroundColor: 'transparent',
                     fontSize: '13px',
                     color: 'var(--text)',
@@ -561,58 +580,40 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
             {/* Footer */}
             <div style={{
               padding: '16px 24px',
-              borderTop: '1px solid var(--border)',
+              borderTop: '1px solid #eee',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: 'var(--panel-2)'
+              backgroundColor: '#fff'
             }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text)', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#111', cursor: 'pointer' }}>
                 <input 
                   type="checkbox" 
                   checked={replace} 
                   onChange={e => setReplace(e.target.checked)} 
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', accentColor: '#a88c56', width: '16px', height: '16px' }}
                 />
                 Replace existing data
               </label>
               
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button 
-                  style={{
-                    padding: '8px 20px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'white',
-                    color: 'var(--text)',
-                    fontWeight: '500',
-                    fontSize: '14px',
-                    cursor: 'pointer'
-                  }}
+                  className="btn"
+                  style={{ padding: '0 16px', height: '38px', borderColor: 'var(--red)', color: 'var(--red)' }}
                   onClick={closeBox}
                 >
                   Cancel
                 </button>
                 <button 
+                  className="btn-action btn-import"
                   style={{
-                    padding: '8px 20px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    backgroundColor: 'var(--accent)',
-                    color: 'white',
-                    fontWeight: '500',
-                    fontSize: '13px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    cursor: 'pointer',
                     opacity: pastedData.rawRows.length > 0 && importFy && importQuarter && importMonth ? 1 : 0.6
                   }}
                   onClick={handleImportClick}
                   disabled={importing || pastedData.rawRows.length === 0 || !importFy || !importQuarter || !importMonth}
                 >
-                  <Database size={16} />
-                  {importing ? 'Importing...' : 'Import Data'}
+                  <span className="icon-wrapper"><Database size={16} /></span>
+                  <span>{importing ? 'Importing...' : 'Import Data'}</span>
                 </button>
               </div>
             </div>
