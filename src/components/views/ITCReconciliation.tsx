@@ -2,30 +2,47 @@ import React, { useState, useMemo } from 'react';
 import { Search, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useAppContext } from '../../context/AppContext';
-import { runReconciliation, reconSummary } from '../../utils/reconciliation';
+import { getDashboardReconData } from '../../utils/booksReconciliation';
 import { fmtNum } from '../../utils/format';
 import ReconTable from '../common/ReconTable';
 import EmptyState from '../common/EmptyState';
 import { useToast } from '../common/Toast';
 
 export default function Reconciliation() {
-  const { currentBooks = [], currentGstr2b = [], activeCompany, month, financialYear, settings, resolutions } = useAppContext() as any;
+  const { currentBooks = [], currentGstr2b = [], fyGstr2b = [], activeCompany, month, financialYear, settings, resolutions } = useAppContext() as any;
   const { showToast } = useToast() as any;
   
   const [filter, setFilter] = useState('Matched');
   const [searchQuery, setSearchQuery] = useState('');
-
   const rows = useMemo(() => 
-    runReconciliation(currentBooks, currentGstr2b, settings.tolerance, settings.normalizeInvoice, resolutions),
-    [currentBooks, currentGstr2b, settings, resolutions]
+    getDashboardReconData(currentBooks, currentGstr2b, fyGstr2b, settings.tolerance, settings.normalizeInvoice),
+    [currentBooks, currentGstr2b, fyGstr2b, settings]
   );
   
-  const sum = useMemo(() => reconSummary(rows), [rows]);
+  const sum = useMemo(() => {
+    const counts: Record<string, number> = {
+      Matched: 0,
+      Mismatch: 0,
+      'Not in 2B': 0,
+      'Not in Books': 0,
+      Duplicate: 0
+    };
+    rows.forEach(r => {
+      if (r.status.startsWith('Matched')) counts['Matched']++;
+      else if (r.status === 'Not in 2B') counts['Not in 2B']++;
+      else if (r.status === 'Not in Books') counts['Not in Books']++;
+      else counts['Mismatch']++;
+    });
+    return counts;
+  }, [rows]);
 
   const filteredRows = useMemo(() => {
     let base = filter === 'all' ? rows : rows.filter(r => {
       if (filter === 'Amount Mismatch') {
-        return ['Amount Mismatch', 'GST Mismatch', 'Date Mismatch', 'Taxable Value Mismatch', 'IGST Mismatch', 'CGST Mismatch', 'SGST Mismatch', 'Cess Mismatch', 'Multiple Match / Possible Match'].includes(r.status);
+        return !r.status.startsWith('Matched') && r.status !== 'Not in 2B' && r.status !== 'Not in Books';
+      }
+      if (filter === 'Matched') {
+        return r.status.startsWith('Matched');
       }
       return r.status === filter;
     });
@@ -85,13 +102,11 @@ export default function Reconciliation() {
           </button>
         </div>
       </div>
-      
       <div className="filter-row">
-        <Chip val="Matched" label="Matched" count={sum.counts['Matched'] || 0} />
-        <Chip val="Amount Mismatch" label="Mismatch" count={(sum.counts['Amount Mismatch']||0) + (sum.counts['GST Mismatch']||0) + (sum.counts['Date Mismatch']||0) + (sum.counts['Taxable Value Mismatch']||0) + (sum.counts['IGST Mismatch']||0) + (sum.counts['CGST Mismatch']||0) + (sum.counts['SGST Mismatch']||0) + (sum.counts['Cess Mismatch']||0) + (sum.counts['Multiple Match / Possible Match']||0)} />
-        <Chip val="Not in 2B" label="Not in 2B" count={sum.counts['Not in 2B'] || 0} />
-        <Chip val="Not in Books" label="Not in Books" count={sum.counts['Not in Books'] || 0} />
-        <Chip val="Duplicate Invoice" label="Duplicate" count={sum.counts['Duplicate Invoice'] || 0} />
+        <Chip val="Matched" label="Matched" count={sum['Matched'] || 0} />
+        <Chip val="Amount Mismatch" label="Mismatch" count={sum['Mismatch'] || 0} />
+        <Chip val="Not in 2B" label="Not in 2B" count={sum['Not in 2B'] || 0} />
+        <Chip val="Not in Books" label="Not in Books" count={sum['Not in Books'] || 0} />
       </div>
       
       <ReconTable rows={filteredRows} />

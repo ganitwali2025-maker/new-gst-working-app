@@ -3,7 +3,7 @@ import { Badge } from './Badge';
 import { fmtNum, esc } from '../../utils/format';
 import { MoreVertical } from 'lucide-react';
 
-const STATUS_META = {
+const STATUS_META: Record<string, { cls: string; dot: string }> = {
   'Matched': { cls: 'green', dot: 'green' },
   'Amount Mismatch': { cls: 'yellow', dot: 'yellow' },
   'Missing in 2B': { cls: 'red', dot: 'red' },
@@ -11,7 +11,7 @@ const STATUS_META = {
   'Duplicate': { cls: 'purple', dot: 'purple' },
 };
 
-export default function ReconTable({ rows }) {
+export default function ReconTable({ rows }: { rows: any[] }) {
   if (!rows || rows.length === 0) {
     return (
       <div className="table-wrap">
@@ -26,14 +26,14 @@ export default function ReconTable({ rows }) {
     );
   }
 
-  const reconRowAttention = (r) => r.status !== 'Matched';
+  const reconRowAttention = (r: any) => r.status !== 'Matched';
 
   return (
     <div className="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Priority</th>
+
             <th>Status</th>
             <th>Invoice No.</th>
             <th>Date</th>
@@ -48,18 +48,14 @@ export default function ReconTable({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((r, i) => {
+          {rows.map((r: any, i: number) => {
             const meta = STATUS_META[r.status] || { cls: 'grey', dot: 'grey' };
             const attention = reconRowAttention(r);
             const title = attention ? `Needs review before filing: ${r.status}` : 'Matched — no action needed';
 
             return (
               <tr key={r.id || i}>
-                <td>
-                  <Badge color={attention ? (Math.abs(r.diffTax) > 100 ? 'red' : 'purple') : 'green'} dot title={title}>
-                    {attention ? (Math.abs(r.diffTax) > 100 ? 'High' : 'Review') : 'OK'}
-                  </Badge>
-                </td>
+
                 <td>
                   <Badge color={meta.cls} dot>
                     {r.status}

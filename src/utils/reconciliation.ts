@@ -1,29 +1,29 @@
 import { rowKey, taxTotal, parseInvoiceDate } from './invoice';
 import { MONTHS } from './storage';
 
-export function runReconciliation(books, g2b, tol, normalizeInvoiceSetting, resolutions = {}, allG2b = null) {
-  const bookKeyCount = {};
-  books.forEach(r => { const k = rowKey(r, normalizeInvoiceSetting); bookKeyCount[k] = (bookKeyCount[k]||0)+1; });
-  const g2bKeyCount = {};
-  g2b.forEach(r => { const k = rowKey(r, normalizeInvoiceSetting); g2bKeyCount[k] = (g2bKeyCount[k]||0)+1; });
+export function runReconciliation(books: any[], g2b: any[], tol: number, normalizeInvoiceSetting: any, resolutions: any = {}, allG2b: any[] | null = null) {
+  const bookKeyCount: Record<string, number> = {};
+  books.forEach((r: any) => { const k = rowKey(r, normalizeInvoiceSetting); bookKeyCount[k] = (bookKeyCount[k]||0)+1; });
+  const g2bKeyCount: Record<string, number> = {};
+  g2b.forEach((r: any) => { const k = rowKey(r, normalizeInvoiceSetting); g2bKeyCount[k] = (g2bKeyCount[k]||0)+1; });
 
-  const g2bByKey = {};
-  g2b.forEach(r => { const k = rowKey(r, normalizeInvoiceSetting); (g2bByKey[k] = g2bByKey[k] || []).push(r); });
+  const g2bByKey: Record<string, any[]> = {};
+  g2b.forEach((r: any) => { const k = rowKey(r, normalizeInvoiceSetting); (g2bByKey[k] = g2bByKey[k] || []).push(r); });
   
-  const allG2bByKey = {};
+  const allG2bByKey: Record<string, any[]> = {};
   if (allG2b) {
-    allG2b.forEach(r => { const k = rowKey(r, normalizeInvoiceSetting); (allG2bByKey[k] = allG2bByKey[k] || []).push(r); });
+    allG2b.forEach((r: any) => { const k = rowKey(r, normalizeInvoiceSetting); (allG2bByKey[k] = allG2bByKey[k] || []).push(r); });
   }
 
-  const usedG2b = new Set();
-  const results = [];
+  const usedG2b = new Set<string>();
+  const results: any[] = [];
 
-  books.forEach(bRow => {
+  books.forEach((bRow: any) => {
     const k = rowKey(bRow, normalizeInvoiceSetting);
     
     // Find in current month
     const pool = g2bByKey[k] || [];
-    const available = pool.filter(m => !usedG2b.has(m.id));
+    const available = pool.filter((m: any) => !usedG2b.has(m.id));
     
     // Find in all months
     const poolAll = allG2bByKey[k] || [];
@@ -33,7 +33,7 @@ export function runReconciliation(books, g2b, tol, normalizeInvoiceSetting, reso
     let matchType = null;
     
     if (available.length > 0) {
-      const exact = available.find(m => {
+      const exact = available.find((m: any) => {
         const bDate = parseInvoiceDate(bRow.invoiceDate)?.getTime() || 0;
         const mDate = parseInvoiceDate(m.invoiceDate)?.getTime() || 0;
         const diffTaxable = Math.abs((Number(bRow.taxable)||0) - (Number(m.taxable)||0));
@@ -146,7 +146,7 @@ export function runReconciliation(books, g2b, tol, normalizeInvoiceSetting, reso
     }
   });
 
-  g2b.forEach(r => {
+  g2b.forEach((r: any) => {
     if(!usedG2b.has(r.id)){
       let status = 'Not in Books';
       let remark = '';
@@ -173,16 +173,16 @@ export function runReconciliation(books, g2b, tol, normalizeInvoiceSetting, reso
   return results;
 }
 
-export function reconSummary(rows){
-  const s = { Matched:0, 'Amount Mismatch':0, 'Not in 2B':0, 'Not in Books':0, 'Duplicate Invoice':0, 'Date Mismatch':0, 'Taxable Value Mismatch':0, 'IGST Mismatch':0, 'CGST Mismatch':0, 'SGST Mismatch':0, 'Cess Mismatch':0, 'GST Mismatch':0, 'Multiple Match / Possible Match':0 };
-  const val = { Matched:0, 'Amount Mismatch':0, 'Not in 2B':0, 'Not in Books':0, 'Duplicate Invoice':0, 'Date Mismatch':0, 'Taxable Value Mismatch':0, 'IGST Mismatch':0, 'CGST Mismatch':0, 'SGST Mismatch':0, 'Cess Mismatch':0, 'GST Mismatch':0, 'Multiple Match / Possible Match':0 };
-  rows.forEach(r => { s[r.status] = (s[r.status]||0)+1; val[r.status] = (val[r.status]||0) + Math.abs(r.booksTax ?? r.g2bTax ?? 0); });
+export function reconSummary(rows: any[]){
+  const s: Record<string, number> = { Matched:0, 'Amount Mismatch':0, 'Not in 2B':0, 'Not in Books':0, 'Duplicate Invoice':0, 'Date Mismatch':0, 'Taxable Value Mismatch':0, 'IGST Mismatch':0, 'CGST Mismatch':0, 'SGST Mismatch':0, 'Cess Mismatch':0, 'GST Mismatch':0, 'Multiple Match / Possible Match':0 };
+  const val: Record<string, number> = { Matched:0, 'Amount Mismatch':0, 'Not in 2B':0, 'Not in Books':0, 'Duplicate Invoice':0, 'Date Mismatch':0, 'Taxable Value Mismatch':0, 'IGST Mismatch':0, 'CGST Mismatch':0, 'SGST Mismatch':0, 'Cess Mismatch':0, 'GST Mismatch':0, 'Multiple Match / Possible Match':0 };
+  rows.forEach((r: any) => { s[r.status] = (s[r.status]||0)+1; val[r.status] = (val[r.status]||0) + Math.abs(r.booksTax ?? r.g2bTax ?? 0); });
   return { counts: s, values: val, total: rows.length };
 }
 
-export function computeOldITC(books, financialYear, month){
+export function computeOldITC(books: any[], financialYear: string, month: string){
   const selMonthIdx = MONTHS.indexOf(month);
-  return books.filter(r => {
+  return books.filter((r: any) => {
     const d = parseInvoiceDate(r.invoiceDate);
     if(!d) return false;
     const invMonthIdx = d.getMonth() >= 3 ? d.getMonth()-3 : d.getMonth()+9;

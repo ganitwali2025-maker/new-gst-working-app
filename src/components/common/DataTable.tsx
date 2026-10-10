@@ -326,7 +326,7 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                 <th className="num" style={{textAlign: "center"}}>IGST</th>
                 <th className="num" style={{textAlign: "center"}}>CGST</th>
                 <th className="num" style={{textAlign: "center"}}>SGST</th>
-                <th className="num" style={{textAlign: "center"}}>CESS</th>
+                <th className="num no-print" style={{textAlign: "center"}}>CESS</th>
                 <th className="num" style={{textAlign: "center"}}>Total Tax</th>
               </>
             ) : ['gstr1', 'books'].includes(type) ? (
@@ -342,13 +342,13 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Integrated Tax (₹)' : 'IGST'}</th>
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Central Tax (₹)' : 'CGST'}</th>
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'State Tax (₹)' : 'SGST'}</th>
-                {type === 'books' && <th className="num" style={{textAlign: "center"}}>Cess</th>}
+                {type === 'books' && <th className="num no-print" style={{textAlign: "center"}}>Cess</th>}
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Total Tax Amount (₹)' : 'Total Tax'}</th>
                 <th className="num" style={{textAlign: "center"}}>{type === 'books' ? 'Total Invoice Value (₹)' : 'Total Invoice Value'}</th>
               </>
             ) : (
               <>
-                <th>Priority</th>
+
                 <th>Status</th>
                 <th style={{textAlign: "center"}}>Invoice No.</th>
                 <th>Date</th>
@@ -358,11 +358,11 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                 <th className="num" style={{textAlign: "center"}}>IGST</th>
                 <th className="num" style={{textAlign: "center"}}>CGST</th>
                 <th className="num" style={{textAlign: "center"}}>SGST</th>
-                <th className="num" style={{textAlign: "center"}}>Cess</th>
+                <th className="num no-print" style={{textAlign: "center"}}>Cess</th>
                 <th className="num" style={{textAlign: "center"}}>Total</th>
               </>
             )}
-            {dataType && <th style={{ width: '60px', textAlign: 'center' }}>ACTION</th>}
+            {dataType && <th className="no-print" style={{ width: '60px', textAlign: 'center' }}>ACTION</th>}
           </tr>
         </thead>
         <tbody>
@@ -373,7 +373,14 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               </td>
             </tr>
           ) : rows.map((r, i) => {
-            const meta = STATUS_META[r.recoStatus] || { cls: 'grey', dot: 'grey' };
+            let meta = STATUS_META[r.recoStatus];
+            if (!meta && r.recoStatus) {
+              if (r.recoStatus.startsWith('Matched')) meta = { cls: 'green', dot: 'green' };
+              else if (r.recoStatus.includes('Invoice No. Not Match') || r.recoStatus === 'Not in 2B') meta = { cls: 'red', dot: 'red' };
+              else if (r.recoStatus === 'Not in Book') meta = { cls: 'blue', dot: 'blue' };
+              else meta = { cls: 'yellow', dot: 'yellow' };
+            }
+            meta = meta || { cls: 'grey', dot: 'grey' };
             if (isRcm || dataType === 'rcm') {
               return (
                 <tr key={r.id || i}>
@@ -389,7 +396,7 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.igst || 0) + Number(r.cgst || 0) + Number(r.sgst || 0))}</td>
                   {dataType && (
-                    <td style={{ textAlign: 'center' }}>
+                    <td className="no-print" style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                         <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setInvoiceViewRow(r)} title="View Row">
                           <Eye size={15} />
@@ -421,10 +428,10 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
-                  <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>
+                  <td className="num no-print" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(taxTotal(r))}</td>
                   {dataType && (
-                    <td style={{ textAlign: 'center' }}>
+                    <td className="no-print" style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                         <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setInvoiceViewRow(r)} title="View Row">
                           <Eye size={15} />
@@ -455,11 +462,11 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
-                  {type === 'books' && <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>}
+                  {type === 'books' && <td className="num no-print" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>}
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(taxTotal(r))}</td>
                   <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
                   {dataType && (
-                    <td style={{ textAlign: 'center' }}>
+                    <td className="no-print" style={{ textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                         <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setInvoiceViewRow(r)} title="View Row">
                           <Eye size={15} />
@@ -478,7 +485,7 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
             }
             return (
             <tr key={r.id || i}>
-              <td>{getPriorityBadge(r)}</td>
+
               <td>
                 {r.recoStatus ? (
                   <Badge color={meta.cls} dot>
@@ -496,10 +503,10 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
               <td className="num" style={{textAlign: "center"}}>{fmtNum(r.igst)}</td>
               <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cgst)}</td>
               <td className="num" style={{textAlign: "center"}}>{fmtNum(r.sgst)}</td>
-              <td className="num" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>
+              <td className="num no-print" style={{textAlign: "center"}}>{fmtNum(r.cess)}</td>
               <td className="num" style={{textAlign: "center"}}>{fmtNum(Number(r.taxable || 0) + taxTotal(r))}</td>
               {dataType && (
-                <td style={{ textAlign: 'center' }}>
+                <td className="no-print" style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                     {r.reconData && (r.reconData.bRowId || r.reconData.g2bId) && (
                       <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)' }} onClick={() => setViewMatchRow(r)} title="View Match Details">

@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRightLeft } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
-import { runReconciliation, reconSummary } from '../../utils/reconciliation';
+import { reconSummary } from '../../utils/reconciliation';
+import { getDashboardReconData } from '../../utils/booksReconciliation';
 import { fmtINR, fmtNum } from '../../utils/format';
 import { taxTotal } from '../../utils/invoice';
 import KpiCard from '../common/KpiCard';
@@ -13,25 +14,25 @@ import TaxSummaryCards from '../common/TaxSummaryCards';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { currentBooks = [], currentGstr2b = [], activeCompany, month, financialYear, settings } = useAppContext() as any;
+  const { currentBooks = [], currentGstr2b = [], fyGstr2b = [], activeCompany, month, financialYear, settings } = useAppContext() as any;
 
-  const rows = runReconciliation(currentBooks, currentGstr2b, settings.tolerance, settings.normalizeInvoice);
+  const rows = getDashboardReconData(currentBooks, currentGstr2b, fyGstr2b, settings.tolerance, settings.normalizeInvoice);
   const sum = reconSummary(rows);
 
   const totalPurchase = (currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
   const totalG2bTaxable = (currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
   const itcBooks = (currentBooks as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0);
   const itcG2b = (currentGstr2b as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0);
-  const mismatchITC = rows.filter(r => r.status === 'Amount Mismatch').reduce((a, r) => a + Math.abs(r.diffTax || 0), 0);
+  const mismatchITC = rows.filter(r => r.status && r.status !== 'Not in Books' && r.status !== 'Not in 2B' && !r.status.startsWith('Matched')).reduce((a, r) => a + Math.abs(r.diffTax || 0), 0);
 
-  const matchedRows = rows.filter(r => r.status === 'Matched');
+  const matchedRows = rows.filter(r => r.status && r.status.startsWith('Matched'));
   const matchedITC = matchedRows.reduce((a, r) => a + (r.booksTax || 0), 0);
   const matchedIgst = matchedRows.reduce((a, r) => a + (r.booksIgst || 0), 0);
   const matchedCgst = matchedRows.reduce((a, r) => a + (r.booksCgst || 0), 0);
   const matchedSgst = matchedRows.reduce((a, r) => a + (r.booksSgst || 0), 0);
   const matchedCess = matchedRows.reduce((a, r) => a + (r.booksCess || 0), 0);
 
-  const unmatchedRows = rows.filter(r => r.status !== 'Matched');
+  const unmatchedRows = rows.filter(r => !r.status || !r.status.startsWith('Matched'));
   const unmatchedITC = unmatchedRows.reduce((a, r) => a + Math.abs(r.diffTax || 0), 0);
   const unmatchedIgst = unmatchedRows.reduce((a, r) => a + Math.abs(r.diffIgst || 0), 0);
   const unmatchedCgst = unmatchedRows.reduce((a, r) => a + Math.abs(r.diffCgst || 0), 0);
@@ -94,7 +95,7 @@ export default function Dashboard() {
             <div className="hint">Non-matched lines needing review</div>
           </div>
         </div>
-        <ReconTable rows={rows.filter(r => r.status !== 'Matched').slice(0, 8)} />
+        <ReconTable rows={rows.filter(r => !r.status || !r.status.startsWith('Matched')).slice(0, 8)} />
       </div>
     </>
   );
