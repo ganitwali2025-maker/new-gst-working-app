@@ -5,18 +5,37 @@ import { useAppContext } from '../../context/AppContext';
 import { getDashboardReconData } from '../../utils/booksReconciliation';
 import { fmtNum } from '../../utils/format';
 import ReconTable from '../common/ReconTable';
-import EmptyState from '../common/EmptyState';
 import { useToast } from '../common/Toast';
 
+const ReconChip = ({ label, count, active, onClick }: any) => (
+  <button 
+    className={`chip ${active ? 'active' : ''}`} 
+    onClick={onClick}
+  >
+    {label} · {fmtNum(count)}
+  </button>
+);
+
 export default function Reconciliation() {
-  const { currentBooks = [], currentGstr2b = [], fyGstr2b = [], activeCompany, month, financialYear, settings, resolutions } = useAppContext() as any;
+  const { currentBooks = [], currentGstr2b = [], currentGstr2bGov = [], fyGstr2b = [], activeCompany, month, financialYear, settings = { tolerance: 1, normalizeInvoice: true } } = useAppContext() as any;
   const { showToast } = useToast() as any;
+
+  const effectiveCurrentGstr2b = (currentGstr2bGov && currentGstr2bGov.length > 0)
+    ? currentGstr2bGov
+    : (currentGstr2b && currentGstr2b.length > 0 ? currentGstr2b : []);
+
+  const effectiveAllMonthsGstr2b = useMemo(() => {
+    const map = new Map<string, any>();
+    (fyGstr2b || []).forEach((r: any) => map.set(r.id, r));
+    effectiveCurrentGstr2b.forEach((r: any) => map.set(r.id, r));
+    return Array.from(map.values());
+  }, [fyGstr2b, effectiveCurrentGstr2b]);
   
   const [filter, setFilter] = useState('Matched');
   const [searchQuery, setSearchQuery] = useState('');
   const rows = useMemo(() => 
-    getDashboardReconData(currentBooks, currentGstr2b, fyGstr2b, settings.tolerance, settings.normalizeInvoice),
-    [currentBooks, currentGstr2b, fyGstr2b, settings]
+    getDashboardReconData(currentBooks, effectiveCurrentGstr2b, effectiveAllMonthsGstr2b, settings.tolerance, settings.normalizeInvoice),
+    [currentBooks, effectiveCurrentGstr2b, effectiveAllMonthsGstr2b, settings]
   );
   
   const sum = useMemo(() => {
@@ -69,17 +88,6 @@ export default function Reconciliation() {
     showToast('Export saved');
   };
 
-
-
-  const Chip = ({ val, label, count }: any) => (
-    <button 
-      className={`chip ${filter === val ? 'active' : ''}`} 
-      onClick={() => setFilter(val)}
-    >
-      {label} · {fmtNum(count)}
-    </button>
-  );
-
   return (
     <div className="panel">
       <div className="panel-head">
@@ -103,10 +111,10 @@ export default function Reconciliation() {
         </div>
       </div>
       <div className="filter-row">
-        <Chip val="Matched" label="Matched" count={sum['Matched'] || 0} />
-        <Chip val="Amount Mismatch" label="Mismatch" count={sum['Mismatch'] || 0} />
-        <Chip val="Not in 2B" label="Not in 2B" count={sum['Not in 2B'] || 0} />
-        <Chip val="Not in Books" label="Not in Books" count={sum['Not in Books'] || 0} />
+        <ReconChip val="Matched" label="Matched" count={sum['Matched'] || 0} active={filter === 'Matched'} onClick={() => setFilter('Matched')} />
+        <ReconChip val="Amount Mismatch" label="Mismatch" count={sum['Mismatch'] || 0} active={filter === 'Amount Mismatch'} onClick={() => setFilter('Amount Mismatch')} />
+        <ReconChip val="Not in 2B" label="Not in 2B" count={sum['Not in 2B'] || 0} active={filter === 'Not in 2B'} onClick={() => setFilter('Not in 2B')} />
+        <ReconChip val="Not in Books" label="Not in Books" count={sum['Not in Books'] || 0} active={filter === 'Not in Books'} onClick={() => setFilter('Not in Books')} />
       </div>
       
       <ReconTable rows={filteredRows} />

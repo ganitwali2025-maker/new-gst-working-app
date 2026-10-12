@@ -38,6 +38,34 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return children;
 }
 
+function ModuleGuard({ moduleId, children }: { moduleId: string; children: React.ReactNode }) {
+  const { hasModuleAccess, user } = useAuth() as any;
+  
+  if (!user) return <Navigate to="/intro" replace />;
+
+  if (!hasModuleAccess(moduleId, 'view')) {
+    return (
+      <div className="panel" style={{ textAlign: 'center', padding: '60px 20px', maxWidth: '600px', margin: '40px auto' }}>
+        <div style={{ color: 'var(--red)', fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>
+          Access Denied
+        </div>
+        <div style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '20px' }}>
+          You do not have permission to view this module. Please contact your system Administrator.
+        </div>
+        <button 
+          className="btn primary" 
+          onClick={() => window.history.back()}
+          style={{ padding: '8px 20px', borderRadius: '8px' }}
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  return children;
+}
+
 function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -49,31 +77,31 @@ function MainLayout() {
         <main id="content">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/liability" element={<Liability />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/books" element={<BooksPurchase />} />
-            <Route path="/old-itc" element={<GenericTablePage title="Old ITC" type="books" hint="Legacy ITC data" />} />
-            <Route path="/itc-not-claimed" element={<GenericTablePage title="ITC Not Claimed" type="books" hint="Unclaimed ITC rows" />} />
+            <Route path="/dashboard" element={<ModuleGuard moduleId="dashboard"><Dashboard /></ModuleGuard>} />
+            <Route path="/liability" element={<ModuleGuard moduleId="summary"><Liability /></ModuleGuard>} />
+            <Route path="/payment" element={<ModuleGuard moduleId="summary"><Payment /></ModuleGuard>} />
+            <Route path="/books" element={<ModuleGuard moduleId="book_itc"><BooksPurchase /></ModuleGuard>} />
+            <Route path="/old-itc" element={<ModuleGuard moduleId="old_itc"><GenericTablePage title="Old ITC" type="books" hint="Legacy ITC data" /></ModuleGuard>} />
+            <Route path="/itc-not-claimed" element={<ModuleGuard moduleId="not_claimed_itc"><GenericTablePage title="ITC Not Claimed" type="books" hint="Unclaimed ITC rows" /></ModuleGuard>} />
             
-            <Route path="/gstr2b" element={<GSTR2B />} />
-            <Route path="/gstr2b-gov" element={<GenericTablePage title="GSTR-2B Current Month" type="g2b_gov" hint="Government 2B data" />} />
+            <Route path="/gstr2b" element={<ModuleGuard moduleId="all_month_2b"><GSTR2B /></ModuleGuard>} />
+            <Route path="/gstr2b-gov" element={<ModuleGuard moduleId="current_month_2b"><GenericTablePage title="GSTR-2B Current Month" type="g2b_gov" hint="Government 2B data" /></ModuleGuard>} />
             
-            <Route path="/reconciliation" element={<Reconciliation />} />
-            <Route path="/unmatch-gst" element={<GenericTablePage title="Unmatch GST" type="books" hint="Unmatched records" />} />
+            <Route path="/reconciliation" element={<ModuleGuard moduleId="itc_reconciliation"><Reconciliation /></ModuleGuard>} />
+            <Route path="/unmatch-gst" element={<ModuleGuard moduleId="difference_data"><GenericTablePage title="Unmatch GST" type="books" hint="Unmatched records" /></ModuleGuard>} />
             
-            <Route path="/rcm-itc" element={<RcmITC />} />
-            <Route path="/rcmdata" element={<RcmData />} />
-            <Route path="/books-itc" element={<GenericTablePage title="Books ITC" type="books" hint="ITC from books" />} />
-            <Route path="/gstr1" element={<GenericTablePage title="GSTR-1 Sales Register" type="gstr1" hint="Complete sales register and outward supplies for accurate GST return filing." />} />
+            <Route path="/rcm-itc" element={<ModuleGuard moduleId="rcm_itc"><RcmITC /></ModuleGuard>} />
+            <Route path="/rcmdata" element={<ModuleGuard moduleId="reverse_itc"><RcmData /></ModuleGuard>} />
+            <Route path="/books-itc" element={<ModuleGuard moduleId="book_itc"><GenericTablePage title="Books ITC" type="books" hint="ITC from books" /></ModuleGuard>} />
+            <Route path="/gstr1" element={<ModuleGuard moduleId="gstr1_sales"><GenericTablePage title="GSTR-1 Sales Register" type="gstr1" hint="Complete sales register and outward supplies for accurate GST return filing." /></ModuleGuard>} />
             
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/reco-report" element={<GenericTablePage title="Reconciliation Report" type="books" hint="Detailed reco report" />} />
-            <Route path="/itc-report" element={<GenericTablePage title="ITC Report" type="books" hint="Comprehensive ITC report" />} />
+            <Route path="/reports" element={<ModuleGuard moduleId="reports"><Reports /></ModuleGuard>} />
+            <Route path="/reco-report" element={<ModuleGuard moduleId="reports"><GenericTablePage title="Reconciliation Report" type="books" hint="Detailed reco report" /></ModuleGuard>} />
+            <Route path="/itc-report" element={<ModuleGuard moduleId="reports"><GenericTablePage title="ITC Report" type="books" hint="Comprehensive ITC report" /></ModuleGuard>} />
             
-            <Route path="/import" element={<Import />} />
-            <Route path="/company" element={<Company />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/import" element={<ModuleGuard moduleId="import_data"><Import /></ModuleGuard>} />
+            <Route path="/company" element={<ModuleGuard moduleId="settings"><Company /></ModuleGuard>} />
+            <Route path="/settings" element={<ModuleGuard moduleId="settings"><Settings /></ModuleGuard>} />
           </Routes>
         </main>
       </div>
@@ -89,6 +117,8 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/intro" element={<Introduction />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/secure-access" element={<SecureAccess />} />
               <Route path="/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
             </Routes>
           </BrowserRouter>

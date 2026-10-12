@@ -1,58 +1,41 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Upload, Trash2, FileText, FileDown, Layers, Search, RefreshCw, Lock, Check, Printer, FileSpreadsheet } from 'lucide-react';
+import { FileText, FileDown, Layers, Search, Check, Printer, FileSpreadsheet } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { fmtINR, fmtNum } from '../../utils/format';
-import { taxTotal } from '../../utils/invoice';
 import { useToast } from '../common/Toast';
 import KpiCard from '../common/KpiCard';
 import DataTable from '../common/DataTable';
 import { runBooksReconciliation } from '../../utils/booksReconciliation';
 
 export default function BooksPurchase() {
-  const navigate = useNavigate();
-  const { currentBooks, currentGstr2b, fyGstr2b, activeCompany, month, financialYear, clearCurrentPeriod, settings, resolutions } = useAppContext() as any;
+  const { currentBooks = [], currentGstr2b = [], currentGstr2bGov = [], fyGstr2b = [], settings = { tolerance: 1, normalizeInvoice: true } } = useAppContext() as any;
   const { showToast } = useToast() as any;
 
   const [activeTab, setActiveTab] = useState('Books Reco with 2B');
-  const [activeFilter, setActiveFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const { reconRows, statusCounts, gstr2bWithStatus, allMonthsWithStatus } = runBooksReconciliation(currentBooks, currentGstr2b, fyGstr2b, settings.tolerance, settings.normalizeInvoice);
-  
-  const booksWithStatus = reconRows.filter((b: any) => {
-    if (activeFilter === 'All') return true;
-    if (activeFilter === 'Matched') {
-      return b.recoStatus && b.recoStatus.startsWith('Matched');
-    }
-    if (activeFilter === 'Not Claimed') {
-      return b.recoStatus && !b.recoStatus.startsWith('Matched') && b.recoStatus !== 'Reversal ITC';
-    }
-    if (activeFilter === 'Not in 2B') {
-      return b.recoStatus === 'Not in 2B';
-    }
-    if (activeFilter === 'Taxable Mismatch') {
-      return b.recoStatus && b.recoStatus.includes('Taxable Not Match');
-    }
-    if (activeFilter === 'Tax Mismatch') {
-      return b.recoStatus && (b.recoStatus.includes('IGST Not Match') || b.recoStatus.includes('CGST Not Match') || b.recoStatus.includes('SGST Not Match') || b.recoStatus.includes('Cess Not Match'));
-    }
-    if (activeFilter === 'GSTIN Mismatch') {
-      return b.recoStatus && b.recoStatus.includes('GST No. Not Match');
-    }
-    if (activeFilter === 'Invoice No. Mismatch') {
-      return b.recoStatus && b.recoStatus.includes('Invoice No. Not Match');
-    }
-    return b.recoStatus === activeFilter;
-  });
 
-  const filteredGstr2b = gstr2bWithStatus.filter((g: any) => {
-    if (activeFilter === 'Not in Book') return g.recoStatus === 'Not in Book';
-    return true;
-  });
+  const effectiveCurrentGstr2b = (currentGstr2bGov && currentGstr2bGov.length > 0)
+    ? currentGstr2bGov
+    : (currentGstr2b && currentGstr2b.length > 0 ? currentGstr2b : []);
+
+  const effectiveAllMonthsGstr2b = React.useMemo(() => {
+    const map = new Map<string, any>();
+    (fyGstr2b || []).forEach((r: any) => map.set(r.id, r));
+    effectiveCurrentGstr2b.forEach((r: any) => map.set(r.id, r));
+    return Array.from(map.values());
+  }, [fyGstr2b, effectiveCurrentGstr2b]);
+
+  const { reconRows, statusCounts, gstr2bWithStatus, allMonthsWithStatus } = runBooksReconciliation(
+    currentBooks,
+    effectiveCurrentGstr2b,
+    effectiveAllMonthsGstr2b,
+    settings.tolerance,
+    settings.normalizeInvoice
+  );
 
   // Calculate card counts
   const tallyBookCount = currentBooks.length;
-  const gstr2bCount = currentGstr2b.length;
+  const gstr2bCount = effectiveCurrentGstr2b.length;
   let matchedCount = 0;
   let notIn2BCount = 0;
   let notMatchCount = 0;
@@ -85,12 +68,6 @@ export default function BooksPurchase() {
 
   const notInBookCount = gstr2bWithStatus.filter((g: any) => g.recoStatus === 'Not in Book').length;
 
-  const handleClear = () => {
-    if (!window.confirm('Remove all Books rows for this company & period?')) return;
-    clearCurrentPeriod('books');
-    showToast('Period data cleared');
-  };
-
   const applySearch = (rows: any[]) => {
     if (!searchTerm || !searchTerm.trim()) return rows;
     const lower = searchTerm.trim().toLowerCase();
@@ -103,7 +80,7 @@ export default function BooksPurchase() {
 
   const getCurrentTableData = () => {
     switch(activeTab) {
-      case 'Books Reco with 2B': return applySearch(reconRows.filter((b: any) => !b.recoStatus.startsWith('Matched')));
+      case 'Books Reco with 2B': return applySearch(reconRows.filter((b: any) => !b.recoStatus.startsWith('Matched') && b.recoStatus !== 'Reversal ITC'));
       case 'Books ITC': return applySearch(currentBooks);
       case 'Government 2B': return applySearch(gstr2bWithStatus);
       case '2B All Months': return applySearch(allMonthsWithStatus);
@@ -223,7 +200,17 @@ export default function BooksPurchase() {
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '12px', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '0 12px', gap: '8px' }}>
+              <Search size={16} color="#7b2cbf" />
+              <input 
+                type="text" 
+                placeholder="Search invoice / GSTIN..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                style={{ border: 'none', outline: 'none', padding: '9px 0', fontSize: '13px', width: '200px', color: '#1f2937' }} 
+              />
+            </div>
             <button onClick={() => window.print()} style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px',
               background: '#5a189a', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer',
@@ -260,7 +247,7 @@ export default function BooksPurchase() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => { setActiveTab(tab.id); if (tab.id === 'Books Reco with 2B') setActiveFilter('All'); }}
+                  onClick={() => setActiveTab(tab.id)}
                   style={{
                     position: 'relative',
                     display: 'flex',

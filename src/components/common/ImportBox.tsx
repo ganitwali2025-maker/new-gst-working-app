@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Clipboard, X, Info, Database } from 'lucide-react';
+import { Upload, Clipboard, X, Database } from 'lucide-react';
 import Papa from 'papaparse';
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from './Toast';
@@ -154,13 +154,13 @@ export default function ImportBox({ target = 'books' }: { target?: string }) {
     
     // 2. Split by Date pattern. To avoid splitting on invoice numbers like RABE/26-27/0013, 
     // we strictly require a space before the date (or it being the start of the string).
-    const chunks = flatText.split(/(?= \d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b)/).map(s => s.trim()).filter(s => s);
+    const chunks = flatText.split(/(?= \d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b)/).map(s => s.trim()).filter(s => s);
     
     const parsedRows: any[] = [];
     
     for (let chunk of chunks) {
       // Find Date
-      const dateMatch = chunk.match(/^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\s+(.*)$/);
+      const dateMatch = chunk.match(/^(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\s+(.*)$/);
       if (!dateMatch) continue; // skip if it doesn't start with a date
       
       const invoiceDate = dateMatch[1];

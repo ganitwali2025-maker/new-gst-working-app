@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { Badge } from './Badge';
 import { fmtNum, esc } from '../../utils/format';
-import { taxTotal, rowDataIssues } from '../../utils/invoice';
-import { Edit2, Trash2, X, ClipboardList, Save, FileText, Calendar, User, Building, IndianRupee, Percent, Check, Undo, Eye, BookOpen, Landmark, CalendarDays, IdCard, Calculator, Link } from 'lucide-react';
+import { taxTotal } from '../../utils/invoice';
+import { Edit2, Trash2, X, ClipboardList, Save, FileText, Calendar, User, Building, IndianRupee, Percent, Eye, BookOpen, Landmark, CalendarDays, IdCard, Calculator, Link } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import InvoiceViewModal from './InvoiceViewModal';
 
 const STATUS_META = {
@@ -19,6 +20,7 @@ const STATUS_META = {
   'Cess Mismatch': { cls: 'yellow', dot: 'yellow' },
   'Not in 2B': { cls: 'red', dot: 'red' },
   'Not in Books': { cls: 'blue', dot: 'blue' },
+  'Not in Book': { cls: 'blue', dot: 'blue' },
   'Duplicate Invoice': { cls: 'purple', dot: 'purple' },
   'Multiple Match / Possible Match': { cls: 'yellow', dot: 'yellow' },
 };
@@ -189,29 +191,29 @@ const MatchDetailsModal = ({ row, onClose }) => {
   );
 };
 
-const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
-  const [formData, setFormData] = useState(row);
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  
-  const Field = ({ icon: Icon, label, name, type="text" }) => (
-    <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid var(--panel)', padding: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-        <div style={{ background: 'var(--panel)', color: 'var(--green)', padding: '6px', borderRadius: '8px', display: 'flex' }}>
-          <Icon size={16} strokeWidth={2.5} />
-        </div>
-        <label style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 600 }}>
-          {label} <span style={{ color: '#ef4444' }}>*</span>
-        </label>
+const AuditField = ({ icon: Icon, label, name, value, onChange, type = "text" }: any) => (
+  <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid var(--panel)', padding: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+      <div style={{ background: 'var(--panel)', color: 'var(--green)', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+        <Icon size={16} strokeWidth={2.5} />
       </div>
-      <input 
-        name={name} 
-        value={formData[name] || ''} 
-        onChange={handleChange} 
-        type={type}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', outline: 'none' }} 
-      />
+      <label style={{ fontSize: '14px', color: 'var(--text)', fontWeight: 600 }}>
+        {label} <span style={{ color: '#ef4444' }}>*</span>
+      </label>
     </div>
-  );
+    <input 
+      name={name} 
+      value={value || ''} 
+      onChange={onChange} 
+      type={type}
+      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', outline: 'none' }} 
+    />
+  </div>
+);
+
+const AuditModal = ({ row, type, onClose, onSave, onDelete }: any) => {
+  const [formData, setFormData] = useState(row);
+  const handleChange = (e: any) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }} onClick={onClose}>
@@ -233,14 +235,14 @@ const AuditModal = ({ row, type, onClose, onSave, onDelete }) => {
 
         {/* Form Body */}
         <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', overflowY: 'auto' }}>
-          <Field icon={FileText} label="Invoice No" name="invoiceNo" />
-          <Field icon={Calendar} label="Date" name="invoiceDate" />
-          <Field icon={User} label="GSTIN" name="gstin" />
-          <Field icon={Building} label="Supplier Name" name="supplierName" />
-          <Field icon={IndianRupee} label="Taxable Value" name="taxable" type="number" />
-          <Field icon={Percent} label="IGST" name="igst" type="number" />
-          <Field icon={FileText} label="CGST" name="cgst" type="number" />
-          <Field icon={FileText} label="SGST" name="sgst" type="number" />
+          <AuditField icon={FileText} label="Invoice No" name="invoiceNo" value={formData.invoiceNo} onChange={handleChange} />
+          <AuditField icon={Calendar} label="Date" name="invoiceDate" value={formData.invoiceDate} onChange={handleChange} />
+          <AuditField icon={User} label="GSTIN" name="gstin" value={formData.gstin} onChange={handleChange} />
+          <AuditField icon={Building} label="Supplier Name" name="supplierName" value={formData.supplierName} onChange={handleChange} />
+          <AuditField icon={IndianRupee} label="Taxable Value" name="taxable" type="number" value={formData.taxable} onChange={handleChange} />
+          <AuditField icon={Percent} label="IGST" name="igst" type="number" value={formData.igst} onChange={handleChange} />
+          <AuditField icon={FileText} label="CGST" name="cgst" type="number" value={formData.cgst} onChange={handleChange} />
+          <AuditField icon={FileText} label="SGST" name="sgst" type="number" value={formData.sgst} onChange={handleChange} />
         </div>
         
         {/* Footer */}
@@ -268,30 +270,17 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
   const [invoiceViewRow, setInvoiceViewRow] = useState(null);
   const [resolveRow, setResolveRow] = useState(null);
   const [viewMatchRow, setViewMatchRow] = useState(null);
-  const { updateRow, deleteRow, resolveMismatch, undoResolve, resolutions } = useAppContext();
+  const { updateRow, deleteRow, resolveMismatch } = useAppContext();
+  const { hasModuleAccess } = useAuth();
 
-  const safeRows = rows || [];
-  const totalTaxable = safeRows.reduce((sum, r) => sum + (Number(r.taxable) || 0), 0);
-  const totalIgst = safeRows.reduce((sum, r) => sum + (Number(r.igst) || 0), 0);
-  const totalCgst = safeRows.reduce((sum, r) => sum + (Number(r.cgst) || 0), 0);
-  const totalSgst = safeRows.reduce((sum, r) => sum + (Number(r.sgst) || 0), 0);
-  const totalCess = safeRows.reduce((sum, r) => sum + (Number(r.cess) || 0), 0);
-  const totalTax = safeRows.reduce((sum, r) => sum + taxTotal(r), 0);
-  const totalInvoice = totalTaxable + totalTax;
+  const targetModule = dataType === 'rcm' ? 'reverse_itc' 
+    : dataType === 'gstr1' ? 'gstr1_sales' 
+    : dataType === 'gstr2b_gov' ? 'current_month_2b' 
+    : dataType === 'g2b' ? 'all_month_2b' 
+    : 'book_itc';
 
-  const getPriorityBadge = (r) => {
-    const issues = rowDataIssues(r);
-    const attention = !!opts.forceAttention || issues.length > 0;
-    const title = opts.forceAttention 
-      ? (opts.attentionReason || 'Needs attention') 
-      : (issues.join('; ') || 'Looks complete');
-    
-    return (
-      <Badge color={attention ? 'orange' : 'green'} dot title={title}>
-        {attention ? 'Review' : 'OK'}
-      </Badge>
-    );
-  };
+  const canEdit = hasModuleAccess(targetModule, 'edit');
+  const canDelete = hasModuleAccess(targetModule, 'delete');
 
   return (
     <div className="table-wrap">
@@ -513,12 +502,16 @@ export default function DataTable({ rows, isBooks, isRcm, opts = {}, dataType, t
                         <Eye size={15} />
                       </button>
                     )}
-                    <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--blue)' }} onClick={() => setAuditRow(r)} title="Edit Row">
-                      <Edit2 size={15} />
-                    </button>
-                    <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--red)' }} onClick={() => { if (window.confirm('Are you sure you want to delete this row?')) deleteRow(dataType, r.id); }} title="Delete Row">
-                      <Trash2 size={15} />
-                    </button>
+                    {canEdit && (
+                      <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--blue)' }} onClick={() => setAuditRow(r)} title="Edit Row">
+                        <Edit2 size={15} />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button className="btn ghost" style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--red)' }} onClick={() => { if (window.confirm('Are you sure you want to delete this row?')) deleteRow(dataType, r.id); }} title="Delete Row">
+                        <Trash2 size={15} />
+                      </button>
+                    )}
                   </div>
                 </td>
               )}

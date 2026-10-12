@@ -1,29 +1,32 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRightLeft } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
-import { reconSummary } from '../../utils/reconciliation';
+import { useAuth } from '../../context/AuthContext';
 import { getDashboardReconData } from '../../utils/booksReconciliation';
 import { fmtINR, fmtNum } from '../../utils/format';
 import { taxTotal } from '../../utils/invoice';
 import KpiCard from '../common/KpiCard';
-import FindingCard from '../common/FindingCard';
 import ReconTable from '../common/ReconTable';
-import EmptyState from '../common/EmptyState';
 import TaxSummaryCards from '../common/TaxSummaryCards';
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const { currentBooks = [], currentGstr2b = [], fyGstr2b = [], activeCompany, month, financialYear, settings } = useAppContext() as any;
+  const { currentBooks = [], currentGstr2b = [], currentGstr2bGov = [], fyGstr2b = [], settings = { tolerance: 1, normalizeInvoice: true } } = useAppContext() as any;
+  const { hasModuleAccess } = useAuth();
 
-  const rows = getDashboardReconData(currentBooks, currentGstr2b, fyGstr2b, settings.tolerance, settings.normalizeInvoice);
-  const sum = reconSummary(rows);
+  const effectiveCurrentGstr2b = (currentGstr2bGov && currentGstr2bGov.length > 0)
+    ? currentGstr2bGov
+    : (currentGstr2b && currentGstr2b.length > 0 ? currentGstr2b : []);
+
+  const effectiveAllMonthsGstr2b = React.useMemo(() => {
+    const map = new Map<string, any>();
+    (fyGstr2b || []).forEach((r: any) => map.set(r.id, r));
+    effectiveCurrentGstr2b.forEach((r: any) => map.set(r.id, r));
+    return Array.from(map.values());
+  }, [fyGstr2b, effectiveCurrentGstr2b]);
+
+  const rows = getDashboardReconData(currentBooks, effectiveCurrentGstr2b, effectiveAllMonthsGstr2b, settings.tolerance, settings.normalizeInvoice);
 
   const totalPurchase = (currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
-  const totalG2bTaxable = (currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
-  const itcBooks = (currentBooks as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0);
-  const itcG2b = (currentGstr2b as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0);
-  const mismatchITC = rows.filter(r => r.status && r.status !== 'Not in Books' && r.status !== 'Not in 2B' && !r.status.startsWith('Matched')).reduce((a, r) => a + Math.abs(r.diffTax || 0), 0);
+  const totalG2bTaxable = (effectiveCurrentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.taxable || 0), 0);
 
   const matchedRows = rows.filter(r => r.status && r.status.startsWith('Matched'));
   const matchedITC = matchedRows.reduce((a, r) => a + (r.booksTax || 0), 0);
@@ -47,11 +50,11 @@ export default function Dashboard() {
     cess: fmtINR((currentBooks as any[]).reduce((a: number, r: any) => a + Number(r.cess || 0), 0))
   };
   const statsG2b = {
-    total: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0)),
-    igst: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.igst || 0), 0)),
-    cgst: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.cgst || 0), 0)),
-    sgst: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.sgst || 0), 0)),
-    cess: fmtINR((currentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.cess || 0), 0))
+    total: fmtINR((effectiveCurrentGstr2b as any[]).reduce((a: number, r: any) => a + taxTotal(r), 0)),
+    igst: fmtINR((effectiveCurrentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.igst || 0), 0)),
+    cgst: fmtINR((effectiveCurrentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.cgst || 0), 0)),
+    sgst: fmtINR((effectiveCurrentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.sgst || 0), 0)),
+    cess: fmtINR((effectiveCurrentGstr2b as any[]).reduce((a: number, r: any) => a + Number(r.cess || 0), 0))
   };
   const statsMatched = {
     total: fmtINR(matchedITC),
@@ -88,15 +91,17 @@ export default function Dashboard() {
       />
 
 
-      <div className="panel">
-        <div className="panel-head">
-          <div>
-            <h3>Recent exceptions</h3>
-            <div className="hint">Non-matched lines needing review</div>
+      {hasModuleAccess('itc_reconciliation', 'view') && (
+        <div className="panel">
+          <div className="panel-head">
+            <div>
+              <h3>Recent exceptions</h3>
+              <div className="hint">Non-matched lines needing review</div>
+            </div>
           </div>
+          <ReconTable rows={rows.filter(r => !r.status || !r.status.startsWith('Matched')).slice(0, 8)} />
         </div>
-        <ReconTable rows={rows.filter(r => !r.status || !r.status.startsWith('Matched')).slice(0, 8)} />
-      </div>
+      )}
     </>
   );
 }

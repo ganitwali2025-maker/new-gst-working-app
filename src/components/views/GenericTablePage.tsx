@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Upload, Save, Lock, Unlock, Trash2, RefreshCw } from 'lucide-react';
+import { Lock, Unlock, Trash2, RefreshCw } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import DataTable from '../common/DataTable';
 import KpiCard from '../common/KpiCard';
 import ImportBox from '../common/ImportBox';
@@ -8,18 +9,31 @@ import { fmtINR } from '../../utils/format';
 import { taxTotal } from '../../utils/invoice';
 
 export default function GenericTablePage({ title, hint, type = 'books' }: { title: string, hint?: string, type?: string }) {
-      const { activeCompany, month, financialYear, currentBooks, currentGstr2b, currentGstr2bGov, currentGstr1, updateState, gstr1, activeCompanyId, checkIsLocked, toggleLock, clearCurrentPeriod, fetchGstr1FromSheets, fetchBooksFromSheets, fetchGstr2bGovFromSheets, syncGstr1ToSheets, syncBooksToSheets, syncGstr2bGovToSheets } = useAppContext() as any;
+  const { activeCompany, month, financialYear, currentBooks, currentGstr2b, currentGstr2bGov, currentGstr1, activeCompanyId, checkIsLocked, toggleLock, clearCurrentPeriod, fetchGstr1FromSheets, fetchBooksFromSheets, fetchGstr2bGovFromSheets } = useAppContext() as any;
+  const { hasModuleAccess } = useAuth() as any;
   const [isSyncing, setIsSyncing] = useState(false);
   
-    React.useEffect(() => {
-    if (type === 'gstr1') fetchGstr1FromSheets(); else if (type === 'books') fetchBooksFromSheets(); else if (type === 'g2b_gov') fetchGstr2bGovFromSheets();
+  const targetModule = type === 'rcm' ? 'reverse_itc'
+    : type === 'gstr1' ? 'gstr1_sales'
+    : type === 'g2b_gov' ? 'current_month_2b'
+    : type === 'g2b' ? 'all_month_2b'
+    : 'book_itc';
+
+  const canAdd = hasModuleAccess(targetModule, 'add') || hasModuleAccess(targetModule, 'import_export');
+  const canDelete = hasModuleAccess(targetModule, 'delete');
+
+  React.useEffect(() => {
+    if (type === 'gstr1') fetchGstr1FromSheets(); 
+    else if (type === 'books') fetchBooksFromSheets(); 
+    else if (type === 'g2b_gov') fetchGstr2bGovFromSheets();
   }, [type, activeCompanyId]);
   
   const isLocked = checkIsLocked(type);
   
   let rows: any[] = [];
-    if (type === 'books') rows = currentBooks;
-  else if (type === 'g2b') rows = currentGstr2b; else if (type === 'g2b_gov') rows = currentGstr2bGov || [];
+  if (type === 'books') rows = currentBooks;
+  else if (type === 'g2b') rows = currentGstr2b; 
+  else if (type === 'g2b_gov') rows = currentGstr2bGov || [];
   else if (type === 'gstr1') rows = currentGstr1;
   rows = rows || [];
 
@@ -29,10 +43,12 @@ export default function GenericTablePage({ title, hint, type = 'books' }: { titl
   const totalSgst = rows.reduce((a, r) => a + Number(r.sgst || 0), 0);
   const totalGst = rows.reduce((a, r) => a + taxTotal(r), 0);
 
-      const handlePullFromSheets = async () => {
+  const handlePullFromSheets = async () => {
     setIsSyncing(true);
     try {
-      if (type === 'gstr1') await fetchGstr1FromSheets(); if (type === 'books') await fetchBooksFromSheets(); if (type === 'g2b_gov') await fetchGstr2bGovFromSheets();
+      if (type === 'gstr1') await fetchGstr1FromSheets(); 
+      if (type === 'books') await fetchBooksFromSheets(); 
+      if (type === 'g2b_gov') await fetchGstr2bGovFromSheets();
     } finally {
       setIsSyncing(false);
     }
@@ -68,13 +84,13 @@ export default function GenericTablePage({ title, hint, type = 'books' }: { titl
               </span>
               <span>{isLocked ? "Locked" : "Lock Sheet"}</span>
             </button>
-            {['gstr1', 'books', 'g2b_gov'].includes(type) && !isLocked && (
+            {['gstr1', 'books', 'g2b_gov'].includes(type) && !isLocked && canDelete && (
               <button className="btn-action btn-clear" onClick={() => { if (window.confirm(`Are you sure you want to clear data for ${month} ${financialYear}?`)) { clearCurrentPeriod(type); } }}><span className="icon-wrapper"><Trash2 size={16} /></span><span>Clear Data</span></button>
             )}
             {['gstr1', 'books', 'g2b_gov'].includes(type) && (
               <button className="btn-action btn-refresh" onClick={handlePullFromSheets} disabled={isSyncing}><span className="icon-wrapper"><RefreshCw size={16} /></span><span>{isSyncing ? "Refreshing..." : "Refresh"}</span></button>
             )}
-            {['gstr1', 'books', 'g2b_gov'].includes(type) && !isLocked && (
+            {['gstr1', 'books', 'g2b_gov'].includes(type) && !isLocked && canAdd && (
               <ImportBox target={type} />
             )}
           </div>
@@ -84,11 +100,3 @@ export default function GenericTablePage({ title, hint, type = 'books' }: { titl
     </>
   );
 }
-
-
-
-
-
-
-
-

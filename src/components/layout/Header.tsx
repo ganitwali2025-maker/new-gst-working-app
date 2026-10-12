@@ -13,7 +13,11 @@ const PAGE_META = {
   '/gstr2b': { title: 'GSTR-2B All Months', sub: 'Auto-drafted ITC statement from GSTN' },
   '/gstr2b-gov': { title: 'GSTR-2B Current Month', sub: 'Current month auto-drafted ITC statement' },
   '/rcmdata': { title: 'RCM Invoices', sub: 'Reverse charge purchases tracked separately from 2B' },
+  '/rcm-itc': { title: 'RCM ITC', sub: 'Reverse Charge Mechanism ITC overview and eligibility' },
+  '/books-itc': { title: 'Books ITC', sub: 'ITC as per books of accounts' },
   '/reconciliation': { title: 'ITC Reconciliation', sub: 'Books vs GSTR-2B, matched line by line' },
+  '/reco-report': { title: 'Reconciliation Report', sub: 'Detailed line-by-line reconciliation report' },
+  '/itc-report': { title: 'ITC Report', sub: 'Comprehensive input tax credit report' },
   '/old-itc': { title: 'Old ITC', sub: 'Old ITC carried forward' },
   '/itc-not-claimed': { title: 'ITC Not Claimed', sub: 'ITC not yet claimed' },
   '/reverse-itc': { title: 'Reverse ITC', sub: 'ITC reversed' },
@@ -61,17 +65,13 @@ export default function Topbar({ toggleSidebar }) {
           
         
         <div>
-          <div className="page-title">{activeCompany?.name || 'GST RecoManager'}</div>
+          <div className="page-title">{activeCompany?.name || 'Passary Minerals Madhya Pvt Ltd'}</div>
           <div className="page-sub">
             <span style={{fontWeight: 600, color: 'var(--accent)'}}>{meta.title}</span> 
             <span style={{color: 'var(--muted)', margin: '0 6px'}}>•</span> 
             {meta.sub}
-            {activeCompany?.gstin && (
-              <>
-                <span style={{color: 'var(--muted)', margin: '0 6px'}}>•</span> 
-                GSTIN: <span style={{fontFamily: 'monospace', fontWeight: 500}}>{activeCompany.gstin}</span>
-              </>
-            )}
+            <span style={{color: 'var(--muted)', margin: '0 6px'}}>•</span> 
+            GSTIN: <span style={{fontFamily: 'monospace', fontWeight: 500}}>{activeCompany?.gstin || '22AAHCP9274B1ZI'}</span>
           </div>
         </div>
       </div>

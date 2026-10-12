@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
-  Download, CreditCard, FileText, Banknote, Calculator, Wallet, CheckCircle,
-  ShoppingCart, ShieldCheck, AlertTriangle, AlertCircle, FileWarning, ArrowRight
+  Banknote, Calculator, Wallet, ShoppingCart, ShieldCheck
 } from 'lucide-react';
 
 export default function Payment() {
-  const [period, setPeriod] = useState('September 2026');
   const fmt = (num: number) => '₹ ' + num.toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 
   return (

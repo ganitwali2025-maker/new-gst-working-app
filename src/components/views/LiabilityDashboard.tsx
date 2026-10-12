@@ -4,17 +4,14 @@ import {
   Activity, AlertCircle, CheckCircle, Info, PieChart, ShieldCheck, ArrowRightLeft, ArrowUpRight, Coins, ChevronRight
 } from 'lucide-react';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell
+  PieChart as RechartsPieChart, Pie, Cell
 } from 'recharts';
 import { useAppContext } from '../../context/AppContext';
-import { fmtINR, fmtNum } from '../../utils/format';
-import EmptyState from '../common/EmptyState';
+import { fmtINR } from '../../utils/format';
 import StockItemSales from '../common/StockItemSales';
 
 export default function Liability() {
-  const { currentGstr1 = [], fyGstr1 = [], activeCompany, month, financialYear } = useAppContext() as any;
-
-
+  const { currentGstr1 = [], fyGstr1 = [], financialYear, month, activeCompany } = useAppContext() as any;
 
   // Basic Calculations for current month
   const mTotalTaxable = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.taxable) || 0), 0);
@@ -22,16 +19,6 @@ export default function Liability() {
   const mTotalCgst = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.cgst) || 0), 0);
   const mTotalSgst = (currentGstr1 as any[]).reduce((a: number, r: any) => a + (Number(r.sgst) || 0), 0);
   const mOutput = mTotalIgst + mTotalCgst + mTotalSgst;
-
-  // Chart Data (Mock trend scaled to Current Month)
-  const chartData = [
-    { name: 'Nov 25', output: (mOutput || 4275680) * 0.82 },
-    { name: 'Dec 25', output: (mOutput || 4275680) * 0.89 },
-    { name: 'Jan 26', output: (mOutput || 4275680) * 0.94 },
-    { name: 'Feb 26', output: (mOutput || 4275680) * 0.84 },
-    { name: 'Mar 26', output: (mOutput || 4275680) * 0.91 },
-    { name: 'Apr 26', output: mOutput || 4275680 },
-  ];
 
   const gstCompData = [
     { name: 'CGST', value: mTotalCgst, color: 'var(--green)' },
@@ -82,7 +69,7 @@ export default function Liability() {
     sc: r.customerName ? 'blue' : 'yellow'
   }));
 
-  const renderCustomDonut = (data: any, totalLabel: any, totalValue: any, totalSubLabel?: any) => (
+  const renderCustomDonut = (data: any, totalLabel: any, totalValue: any) => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', width: '100%', padding: '10px 0' }}>
       <div className="od-donut-wrap" style={{ width: '140px', height: '140px', flex: 'none' }}>
         <RechartsPieChart width={140} height={140}>

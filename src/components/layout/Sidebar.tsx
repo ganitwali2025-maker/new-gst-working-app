@@ -2,59 +2,51 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, Scale, Book, FileText, Landmark,
-  ArrowRightLeft, FileBarChart, Upload, Building2, Settings, Banknote,
-  ChevronDown, ChevronRight, ChevronLeft
-, BarChart3, PanelLeftClose, PanelLeftOpen, LucideIcon } from 'lucide-react';
+  ArrowRightLeft, FileBarChart, Building2, Settings, Banknote,
+  ChevronDown, ChevronRight, ChevronLeft, LucideIcon 
+} from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 type NavItem = {
-  id?: string;
+  id: string;
+  moduleId?: string;
   path?: string;
   label: string;
   icon?: LucideIcon;
   isHeading?: boolean;
-  isGroup?: boolean;
-  children?: { id: string; path: string; label: string }[];
 };
 
 const NAV: NavItem[] = [
-  { id: 'dashboard', path: '/dashboard', label: 'ITC Dashboard', icon: LayoutDashboard },
-  { id: 'liability', path: '/liability', label: 'Liability Dashboard', icon: Scale },
-  { id: 'payment', path: '/payment', label: 'Payment Dashboard', icon: Banknote },
-  { id: 'reports', path: '/reports', label: 'GST Summary', icon: FileBarChart },
+  { id: 'dashboard', moduleId: 'dashboard', path: '/dashboard', label: 'ITC Dashboard', icon: LayoutDashboard },
+  { id: 'liability', moduleId: 'summary', path: '/liability', label: 'Liability Dashboard', icon: Scale },
+  { id: 'payment', moduleId: 'summary', path: '/payment', label: 'Payment Dashboard', icon: Banknote },
+  { id: 'reports', moduleId: 'reports', path: '/reports', label: 'GST Summary', icon: FileBarChart },
   
-  { isHeading: true, label: 'GST RECO STEP' },
-  { id: 'reconciliation', path: '/reconciliation', label: 'Final Reconciliation Report', icon: ArrowRightLeft },
-  { id: 'rcm-itc', path: '/rcm-itc', label: 'RCM ITC', icon: Landmark },
-  { isHeading: true, label: 'BOOKS RECO' },
-  { id: 'books', path: '/books', label: 'Books Reco with 2B', icon: Book },
-  { id: 'old-itc', path: '/old-itc', label: 'Old ITC', icon: Book },
-  { id: 'itc-not-claimed', path: '/itc-not-claimed', label: 'ITC Not Claimed', icon: Book },
-  { isHeading: true, label: 'GSTR-2B' },
-  { id: 'gstr2b', path: '/gstr2b', label: 'GSTR-2B All Months', icon: FileText },
-  { id: 'gstr2b-gov', path: '/gstr2b-gov', label: 'GSTR-2B Current Month', icon: FileText },
-  { isHeading: true, label: 'GST & TAX' },
-  { id: 'rcmdata', path: '/rcmdata', label: 'RCM Invoices', icon: Landmark },
-  { id: 'books-itc', path: '/books-itc', label: 'Books ITC', icon: Landmark },
-  { id: 'gstr1', path: '/gstr1', label: 'GST R-1', icon: Landmark },
+  { id: 'head-reco', isHeading: true, label: 'GST RECO STEP' },
+  { id: 'reconciliation', moduleId: 'itc_reconciliation', path: '/reconciliation', label: 'Final Reconciliation Report', icon: ArrowRightLeft },
+  { id: 'rcm-itc', moduleId: 'rcm_itc', path: '/rcm-itc', label: 'RCM ITC', icon: Landmark },
+  
+  { id: 'head-books', isHeading: true, label: 'BOOKS RECO' },
+  { id: 'books', moduleId: 'book_itc', path: '/books', label: 'Books Reco with 2B', icon: Book },
+  { id: 'old-itc', moduleId: 'old_itc', path: '/old-itc', label: 'Old ITC', icon: Book },
+  { id: 'itc-not-claimed', moduleId: 'not_claimed_itc', path: '/itc-not-claimed', label: 'ITC Not Claimed', icon: Book },
+  
+  { id: 'head-2b', isHeading: true, label: 'GSTR-2B' },
+  { id: 'gstr2b', moduleId: 'all_month_2b', path: '/gstr2b', label: 'GSTR-2B All Months', icon: FileText },
+  { id: 'gstr2b-gov', moduleId: 'current_month_2b', path: '/gstr2b-gov', label: 'GSTR-2B Current Month', icon: FileText },
+  
+  { id: 'head-tax', isHeading: true, label: 'GST & TAX' },
+  { id: 'rcmdata', moduleId: 'reverse_itc', path: '/rcmdata', label: 'RCM Invoices', icon: Landmark },
+  { id: 'books-itc', moduleId: 'book_itc', path: '/books-itc', label: 'Books ITC', icon: Landmark },
+  { id: 'gstr1', moduleId: 'gstr1_sales', path: '/gstr1', label: 'GST R-1', icon: Landmark },
 
-  { isHeading: true, label: 'SETTINGS' },
-
-  { id: 'company', path: '/company', label: 'Company / GSTIN', icon: Building2 },
-  { id: 'settings', path: '/settings', label: 'Settings', icon: Settings },
+  { id: 'head-settings', isHeading: true, label: 'SETTINGS' },
+  { id: 'company', moduleId: 'settings', path: '/company', label: 'Company / GSTIN', icon: Building2 },
+  { id: 'settings', moduleId: 'settings', path: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSidebar: () => void }) {
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ 
-    'books-reco': true, 
-    'gstr2b-group': true, 
-    'reco-group': true, 
-    'gst-tax': false, 
-    'reports-group': false 
-  });
-
-  const toggleGroup = (id: string) => {
-    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  const { hasModuleAccess } = useAuth();
 
   return (
     <aside id="sidebar">
@@ -90,54 +82,50 @@ export default function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, to
       </div>
 
       <nav className="navlist" id="navlist" style={{ overflowY: 'auto' }}>
-        {NAV.map((n, i) => {
-          if (n.isHeading) {
-            return <div key={'head-'+i} className="nav-group-label">{n.label}</div>;
+        {(() => {
+          // Filter items based on user's view permission
+          const visibleItems = NAV.filter(item => {
+            if (item.isHeading) return true;
+            if (!item.moduleId) return true;
+            return hasModuleAccess(item.moduleId, 'view');
+          });
+
+          // Filter out section headings if they have no visible child links under them
+          const finalItems: NavItem[] = [];
+          for (let idx = 0; idx < visibleItems.length; idx++) {
+            const current = visibleItems[idx];
+            if (current.isHeading) {
+              // Check if any subsequent non-heading item exists before the next heading
+              let hasChildren = false;
+              for (let next = idx + 1; next < visibleItems.length; next++) {
+                if (visibleItems[next].isHeading) break;
+                hasChildren = true;
+                break;
+              }
+              if (hasChildren) {
+                finalItems.push(current);
+              }
+            } else {
+              finalItems.push(current);
+            }
           }
-          if (n.isGroup && n.id) {
-            const isOpen = openGroups[n.id];
+
+          return finalItems.map((n, i) => {
+            if (n.isHeading) {
+              return <div key={'head-' + i} className="nav-group-label">{n.label}</div>;
+            }
             return (
-              <div key={n.id} className="nav-group">
-                <div 
-                  className="navlink group-toggle" 
-                  onClick={() => toggleGroup(n.id as string)}
-                >
-                  <div className="navlink-inner">
-                    {n.icon && <n.icon size={16} />}
-                    <span>{n.label}</span>
-                  </div>
-                  <div className="chevron">
-                    {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  </div>
-                </div>
-                {isOpen && n.children && (
-                  <div className="nav-group-children" style={{ marginLeft: '19px', paddingLeft: '11px', borderLeft: '1px solid var(--border-soft)', display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '2px', marginBottom: '4px' }}>
-                    {n.children.map(child => (
-                      <NavLink 
-                        key={child.id} 
-                        to={child.path} 
-                        className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
-                        style={{ fontSize: '13px', padding: '7px 10px', height: '32px' }}
-                      >
-                        <span>{child.label}</span>
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <NavLink 
+                key={n.id} 
+                to={n.path as string} 
+                className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
+              >
+                {n.icon && <n.icon size={16} />}
+                <span>{n.label}</span>
+              </NavLink>
             );
-          }
-          return (
-            <NavLink 
-              key={n.id} 
-              to={n.path as string} 
-              className={({ isActive }) => `navlink ${isActive ? 'active' : ''}`}
-            >
-              {n.icon && <n.icon size={16} />}
-              <span>{n.label}</span>
-            </NavLink>
-          );
-        })}
+          });
+        })()}
       </nav>
 
     </aside>

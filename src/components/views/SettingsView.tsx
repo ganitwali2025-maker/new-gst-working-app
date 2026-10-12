@@ -1,116 +1,121 @@
 import React from 'react';
-import { Sparkles, Trash2 } from 'lucide-react';
+import { Sliders } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../common/Toast';
+import UserManagement from './UserManagement';
 
 export default function Settings() {
-  const { settings, updateSettings, loadSample, clearAllData } = useAppContext();
-  const { showToast } = useToast();
+  const { settings, updateSettings } = useAppContext() as any;
+  const { showToast } = (useToast() || {}) as any;
 
-  const handleThemeChange = (theme) => {
-    updateSettings({ theme });
-  };
-
-  const handleToleranceChange = (e) => {
+  const handleToleranceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     updateSettings({ tolerance: Number(e.target.value) });
-    showToast('Tolerance updated');
+    showToast?.('Tolerance updated');
   };
 
-  const handleNormToggle = (e) => {
+  const handleNormToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateSettings({ normalizeInvoice: e.target.checked });
-    showToast('Setting updated');
-  };
-
-  const handleClear = () => {
-    if (!window.confirm('This will erase all companies and data on this device. Continue?')) return;
-    clearAllData();
-    showToast('All data cleared');
+    showToast?.('Setting updated');
   };
 
   return (
-    <>
-      <div className="panel">
-        <h3 style={{ marginTop: 0 }}>Appearance</h3>
-        <div className="settings-row">
-          <div>
-            <div className="t1">Theme</div>
-            <div className="t2">Choose how ReconIQ looks</div>
+    <div className="settings-page" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* 2. MATCHING RULES CARD */}
+      <div 
+        className="panel" 
+        style={{ 
+          background: '#ffffff', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          boxShadow: 'var(--shadow-sm)',
+          padding: '24px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ 
+            background: '#f5f3ff', 
+            color: '#7c3aed', 
+            padding: '10px', 
+            borderRadius: '10px', 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Sliders size={22} />
           </div>
-          <div className="flex gap8">
-            <button className={`chip ${settings.theme === 'dark' ? 'active' : ''}`} onClick={() => handleThemeChange('dark')}>Dark</button>
-            <button className={`chip ${settings.theme === 'light' ? 'active' : ''}`} onClick={() => handleThemeChange('light')}>Light</button>
-            <button className={`chip ${settings.theme === 'blue' ? 'active' : ''}`} onClick={() => handleThemeChange('blue')}>Tally Blue</button>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text)' }}>
+              Matching Rules
+            </h3>
+            <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '2px' }}>
+              Differences within tolerance threshold still count as Matched
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Rounding Tolerance */}
+          <div 
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              padding: '14px 18px',
+              borderRadius: '8px',
+              background: 'var(--panel-2)',
+              border: '1px solid var(--border-soft)'
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>Rounding Tolerance</div>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px' }}>
+                Differences within this amount still count as Matched.
+              </div>
+            </div>
+            <select 
+              className="ctrl" 
+              value={settings?.tolerance ?? 2} 
+              onChange={handleToleranceChange}
+              style={{ minWidth: '120px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              {[0, 1, 2, 5, 10].map(v => (
+                <option key={v} value={v}>₹{v}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Normalize Invoice Numbers */}
+          <div 
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              padding: '14px 18px',
+              borderRadius: '8px',
+              background: 'var(--panel-2)',
+              border: '1px solid var(--border-soft)'
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text)' }}>Normalize Invoice Numbers</div>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginTop: '2px' }}>
+                Ignore special characters and zeroes when matching.
+              </div>
+            </div>
+            <label className="toggle" style={{ margin: 0 }}>
+              <input 
+                type="checkbox" 
+                checked={!!settings?.normalizeInvoice} 
+                onChange={handleNormToggle} 
+              />
+              <span className="slider"></span>
+            </label>
           </div>
         </div>
       </div>
 
-      <div className="panel">
-        <h3 style={{ marginTop: 0 }}>Matching rules</h3>
-        <div className="settings-row">
-          <div>
-            <div className="t1">Rounding tolerance</div>
-            <div className="t2">Differences within this amount still count as Matched</div>
-          </div>
-          <select className="ctrl" value={settings.tolerance} onChange={handleToleranceChange}>
-            {[0, 1, 2, 5, 10].map(v => (
-              <option key={v} value={v}>₹{v}</option>
-            ))}
-          </select>
-        </div>
-        <div className="settings-row">
-          <div>
-            <div className="t1">Normalize invoice numbers</div>
-            <div className="t2">Ignore special characters and zeroes when matching</div>
-          </div>
-          <label className="toggle">
-            <input type="checkbox" checked={settings.normalizeInvoice || false} onChange={handleNormToggle} />
-            <span className="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div className="panel">
-        <h3 style={{ marginTop: 0 }}>Integrations</h3>
-        <div className="settings-row">
-          <div>
-            <div className="t1">Google Sheets Web App URL</div>
-            <div className="t2">Paste your Apps Script URL to enable live syncing</div>
-          </div>
-          <input 
-            type="text" 
-            className="ctrl" 
-            style={{ width: '400px' }}
-            placeholder="https://script.google.com/macros/s/.../exec"
-            value={settings.scriptUrl || ''} 
-            onChange={(e) => {
-              updateSettings({ scriptUrl: e.target.value.trim() });
-            }} 
-            onBlur={() => showToast('Saved integration URL')}
-          />
-        </div>
-      </div>
-
-      <div className="panel">
-        <h3 style={{ marginTop: 0 }}>Data</h3>
-        <div className="settings-row">
-          <div>
-            <div className="t1">Load sample data</div>
-            <div className="t2">Populate the active company & period with demo invoices</div>
-          </div>
-          <button className="btn ghost" onClick={loadSample}>
-            <Sparkles size={14} /> Load sample
-          </button>
-        </div>
-        <div className="settings-row">
-          <div>
-            <div className="t1">Clear all data</div>
-            <div className="t2">Removes every company, books row and GSTR-2B row on this device</div>
-          </div>
-          <button className="btn danger" onClick={handleClear}>
-            <Trash2 size={14} /> Clear everything
-          </button>
-        </div>
-      </div>
-    </>
+      {/* 4. USER MANAGEMENT & ACCESS PERMISSIONS */}
+      <UserManagement />
+    </div>
   );
 }

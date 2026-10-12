@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loadData, saveData, defaultState, FY_LIST, MONTHS, todayFY } from '../utils/storage';
+import { loadData, saveData, defaultState, FY_LIST, MONTHS } from '../utils/storage';
 import { getSampleData } from '../data/sampleData';
 
 const AppContext = createContext();
