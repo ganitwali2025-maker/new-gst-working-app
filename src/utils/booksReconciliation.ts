@@ -67,7 +67,14 @@ export function runBooksReconciliation(
     const bCess = Number(b.cess) || 0;
     const bTax = bIgst + bCgst + bSgst + bCess;
 
-    if (bTaxable < 0 || b.type === 'Debit Note') {
+    const isDebitNote = bTaxable < 0 || 
+      bTax < 0 ||
+      String(b.type || '').toLowerCase().includes('debit') || 
+      String(b.voucherType || '').toLowerCase().includes('debit') ||
+      String(b.invoiceType || '').toLowerCase().includes('debit') ||
+      String(b.docType || '').toLowerCase().includes('debit');
+
+    if (isDebitNote) {
       const status = 'Reversal ITC';
       reconRows.push({
         ...b,

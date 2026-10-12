@@ -43,8 +43,24 @@ export default function BooksPurchase() {
   let totalReversalAmount = 0;
   let totalMatchedAmount = 0;
 
+  const isDebitOrReversal = (r: any) => {
+    const s = String(r.recoStatus || '').toLowerCase();
+    const t = String(r.type || '').toLowerCase();
+    const vt = String(r.voucherType || '').toLowerCase();
+    const it = String(r.invoiceType || '').toLowerCase();
+    const dt = String(r.docType || '').toLowerCase();
+    return s.includes('reversal') || s.includes('debit') || 
+      t.includes('debit') || vt.includes('debit') || it.includes('debit') || dt.includes('debit') ||
+      (Number(r.taxable) < 0);
+  };
+
+  const isMatched = (r: any) => {
+    const s = String(r.recoStatus || '').toLowerCase();
+    return s.startsWith('match');
+  };
+
   reconRows.forEach((r: any) => {
-    if (r.recoStatus === 'Reversal ITC') {
+    if (isDebitOrReversal(r)) {
       reversalItcCount++;
       totalReversalAmount += Math.abs((Number(r.igst)||0) + (Number(r.cgst)||0) + (Number(r.sgst)||0) + (Number(r.cess)||0));
     }
@@ -55,7 +71,7 @@ export default function BooksPurchase() {
       matchedCount += count;
     } else if (status === 'Not in 2B') {
       notIn2BCount += count;
-    } else if (status !== 'Reversal ITC') {
+    } else if (!status.toLowerCase().includes('reversal')) {
       notMatchCount += count;
     }
   });
@@ -80,15 +96,15 @@ export default function BooksPurchase() {
 
   const getCurrentTableData = () => {
     switch(activeTab) {
-      case 'Books Reco with 2B': return applySearch(reconRows.filter((b: any) => !b.recoStatus.startsWith('Matched') && b.recoStatus !== 'Reversal ITC'));
+      case 'Books Reco with 2B': return applySearch(reconRows.filter((b: any) => !isMatched(b) && !isDebitOrReversal(b)));
       case 'Books ITC': return applySearch(currentBooks);
       case 'Government 2B': return applySearch(gstr2bWithStatus);
       case '2B All Months': return applySearch(allMonthsWithStatus);
-      case 'Debit Note': return applySearch(reconRows.filter((b: any) => b.recoStatus === 'Reversal ITC'));
+      case 'Debit Note': return applySearch(reconRows.filter((b: any) => isDebitOrReversal(b)));
       case 'Not in Book': return applySearch(gstr2bWithStatus.filter((g: any) => g.recoStatus === 'Not in Book'));
       case 'Not in 2B': return applySearch(reconRows.filter((b: any) => b.recoStatus === 'Not in 2B'));
-      case 'Match Invoice': return applySearch(reconRows.filter((b: any) => b.recoStatus && b.recoStatus.startsWith('Matched')));
-      case 'Not Match Invoice': return applySearch(reconRows.filter((b: any) => b.recoStatus && !b.recoStatus.startsWith('Matched') && b.recoStatus !== 'Reversal ITC' && b.recoStatus !== 'Not in 2B'));
+      case 'Match Invoice': return applySearch(reconRows.filter((b: any) => isMatched(b)));
+      case 'Not Match Invoice': return applySearch(reconRows.filter((b: any) => !isMatched(b) && !isDebitOrReversal(b) && b.recoStatus !== 'Not in 2B'));
       default: return [];
     }
   };
