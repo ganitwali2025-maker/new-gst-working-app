@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from './Badge';
 import { fmtNum, esc } from '../../utils/format';
-import { MoreVertical } from 'lucide-react';
+import { Eye } from 'lucide-react';
+import ReconSummaryModal from './ReconSummaryModal';
 
 const STATUS_META: Record<string, { cls: string; dot: string }> = {
   'Matched': { cls: 'green', dot: 'green' },
@@ -12,6 +13,8 @@ const STATUS_META: Record<string, { cls: string; dot: string }> = {
 };
 
 export default function ReconTable({ rows }: { rows: any[] }) {
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+
   if (!rows || rows.length === 0) {
     return (
       <div className="table-wrap">
@@ -29,54 +32,68 @@ export default function ReconTable({ rows }: { rows: any[] }) {
   const reconRowAttention = (r: any) => r.status !== 'Matched';
 
   return (
-    <div className="table-wrap">
-      <table>
-        <thead>
-          <tr>
+    <>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Invoice No.</th>
+              <th>Date</th>
+              <th>GSTIN</th>
+              <th>Supplier</th>
+              <th className="num">Books Taxable</th>
+              <th className="num">2B Taxable</th>
+              <th className="num">Books Tax</th>
+              <th className="num">2B Tax</th>
+              <th className="num">Diff (Tax)</th>
+              <th style={{ textAlign: "center", width: "40px" }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r: any, i: number) => {
+              const meta = STATUS_META[r.status] || { cls: 'grey', dot: 'grey' };
+              const attention = reconRowAttention(r);
+              const title = attention ? `Needs review before filing: ${r.status}` : 'Matched — no action needed';
 
-            <th>Status</th>
-            <th>Invoice No.</th>
-            <th>Date</th>
-            <th>GSTIN</th>
-            <th>Supplier</th>
-            <th className="num">Books Taxable</th>
-            <th className="num">2B Taxable</th>
-            <th className="num">Books Tax</th>
-            <th className="num">2B Tax</th>
-            <th className="num">Diff (Tax)</th>
-            <th style={{ textAlign: "center", width: "40px" }}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r: any, i: number) => {
-            const meta = STATUS_META[r.status] || { cls: 'grey', dot: 'grey' };
-            const attention = reconRowAttention(r);
-            const title = attention ? `Needs review before filing: ${r.status}` : 'Matched — no action needed';
+              return (
+                <tr key={r.id || i}>
+                  <td>
+                    <Badge color={meta.cls} dot>
+                      {r.status}
+                    </Badge>
+                  </td>
+                  <td>{esc(r.invoiceNo)}</td>
+                  <td>{esc(r.invoiceDate)}</td>
+                  <td className="mono">{esc(r.gstin)}</td>
+                  <td>{esc(r.supplierName)}</td>
+                  <td className="num">{r.booksTaxable != null ? fmtNum(r.booksTaxable) : '—'}</td>
+                  <td className="num">{r.g2bTaxable != null ? fmtNum(r.g2bTaxable) : '—'}</td>
+                  <td className="num">{r.booksTax != null ? fmtNum(r.booksTax) : '—'}</td>
+                  <td className="num">{r.g2bTax != null ? fmtNum(r.g2bTax) : '—'}</td>
+                  <td className="num" style={{ color: Math.abs(r.diffTax || 0) > 0 ? 'var(--yellow)' : 'var(--muted)' }}>
+                    {fmtNum(r.diffTax)}
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <button
+                      className="btn ghost"
+                      style={{ padding: '6px', height: 'auto', minHeight: '0', color: 'var(--purple)', cursor: 'pointer' }}
+                      onClick={() => setSelectedRow(r)}
+                      title="View Reconciliation Summary"
+                    >
+                      <Eye size={15} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
-            return (
-              <tr key={r.id || i}>
-
-                <td>
-                  <Badge color={meta.cls} dot>
-                    {r.status}
-                  </Badge>
-                </td>
-                <td>{esc(r.invoiceNo)}</td>
-                <td>{esc(r.invoiceDate)}</td>
-                <td className="mono">{esc(r.gstin)}</td>
-                <td>{esc(r.supplierName)}</td>
-                <td className="num">{r.booksTaxable != null ? fmtNum(r.booksTaxable) : '—'}</td>
-                <td className="num">{r.g2bTaxable != null ? fmtNum(r.g2bTaxable) : '—'}</td>
-                <td className="num">{r.booksTax != null ? fmtNum(r.booksTax) : '—'}</td>
-                <td className="num">{r.g2bTax != null ? fmtNum(r.g2bTax) : '—'}</td>
-                <td className="num" style={{ color: Math.abs(r.diffTax || 0) > 0 ? 'var(--yellow)' : 'var(--muted)' }}>
-                  {fmtNum(r.diffTax)}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+      {selectedRow && (
+        <ReconSummaryModal row={selectedRow} onClose={() => setSelectedRow(null)} />
+      )}
+    </>
   );
 }

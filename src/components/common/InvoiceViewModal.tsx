@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, FileText, BarChart3, CloudDownload, Repeat, Calendar, Building2, Info } from 'lucide-react';
-import { fmtINR } from '../../utils/format';
+import { fmtINR, formatDate } from '../../utils/format';
 import { useAppContext } from '../../context/AppContext';
 
 export default function InvoiceViewModal({ row, type, onClose }: { row: any, type: string, onClose: () => void }) {
@@ -13,10 +13,10 @@ export default function InvoiceViewModal({ row, type, onClose }: { row: any, typ
   // Determine Seller and Buyer based on type
   const seller = isGstr1 
     ? { name: activeCompany?.name || 'Your Company', gstin: activeCompany?.gstin || '23AAAAA1234A1Z5', address: 'Madhya Pradesh, India' } 
-    : { name: row.supplierName || 'Unknown Supplier', gstin: row.gstin || 'Unregistered', address: 'As per invoice' };
+    : { name: row.supplierName || row.customerName || 'Unknown Supplier', gstin: row.gstin || 'Unregistered', address: 'As per invoice' };
     
   const buyer = isGstr1 
-    ? { name: row.supplierName || 'Unknown Buyer', gstin: row.gstin || 'Unregistered', address: 'As per invoice' } 
+    ? { name: row.customerName || row.partyName || row.party || row.supplierName || 'Unknown Buyer', gstin: row.gstin || 'Unregistered', address: 'As per invoice' } 
     : { name: activeCompany?.name || 'Your Company', gstin: activeCompany?.gstin || '23AAAAA1234A1Z5', address: 'Madhya Pradesh, India' };
 
   const taxable = Number(row.taxable) || 0;
@@ -78,7 +78,7 @@ export default function InvoiceViewModal({ row, type, onClose }: { row: any, typ
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', width: '130px', color: '#4c1d95', fontSize: '13px', fontWeight: 600, borderRight: '1px solid #d8b4fe', whiteSpace: 'nowrap' }}>
                 <Calendar size={16} /> Invoice Date
               </div>
-              <div style={{ padding: '8px 14px', color: '#1e293b', fontSize: '13px', fontWeight: 700, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.invoiceDate || 'N/A'}</div>
+              <div style={{ padding: '8px 14px', color: '#1e293b', fontSize: '13px', fontWeight: 700, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatDate(row.invoiceDate)}</div>
             </div>
             <div style={{ display: 'flex', background: '#4c1d95' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', width: '130px', color: '#fff', fontSize: '13px', fontWeight: 600, borderRight: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap' }}>
